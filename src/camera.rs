@@ -1,6 +1,18 @@
 use crate::prelude::*;
 use bevy::input::mouse::{MouseButtonInput, MouseMotion, MouseWheel};
 
+#[cfg(target_family = "windows")]
+const SCALE_FACTOR: f32 = -0.05;
+
+#[cfg(not(target_family = "windows"))]
+const SCALE_FACTOR: f32 = 0.01;
+
+#[cfg(target_family = "windows")]
+const DRAG_FACTOR: f32 = 0.005;
+
+#[cfg(not(target_family = "windows"))]
+const DRAG_FACTOR: f32 = 0.01;
+
 pub struct OrbitCameraPlugin;
 
 impl Plugin for OrbitCameraPlugin {
@@ -47,8 +59,8 @@ fn orbit_camera_system(
         // 如果正在拖动，处理鼠标移动事件
         if orbit_camera.is_dragging {
             for event in mouse_motion_events.read() {
-                orbit_camera.azimuthal_angle -= event.delta.x * 0.01;
-                orbit_camera.polar_angle += event.delta.y * 0.01;
+                orbit_camera.azimuthal_angle -= event.delta.x * DRAG_FACTOR;
+                orbit_camera.polar_angle += event.delta.y * DRAG_FACTOR;
 
                 // 限制极角在合理范围内，防止翻转
                 orbit_camera.polar_angle = orbit_camera.polar_angle.clamp(
@@ -59,11 +71,7 @@ fn orbit_camera_system(
         }
 
         for event in mouse_wheel_events.read() {
-            if event.y > 0.0 {
-                orbit_camera.radius *= 1.01;
-            } else {
-                orbit_camera.radius *= 0.99;
-            }
+            orbit_camera.radius *= 1. + SCALE_FACTOR * event.y;
 
             orbit_camera.radius = orbit_camera
                 .radius
