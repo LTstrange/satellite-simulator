@@ -14,13 +14,33 @@ impl Plugin for SatellitePlugin {
 pub struct Satellite;
 
 #[derive(Component)]
-struct OrbitalElements {
+pub struct OrbitalElements {
     semi_major_axis: f32,             // 半长轴
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角
     argument_of_periapsis: f32,       // 近地点角距
     longitude_of_ascending_node: f32, // 升交点赤经
     true_anomaly: f32,                // 真近点角
+}
+
+impl OrbitalElements {
+    pub fn new(
+        semi_major_axis: f32,
+        eccentricity: f32,
+        inclination: f32,
+        argument_of_periapsis: f32,
+        longitude_of_ascending_node: f32,
+        true_anomaly: f32,
+    ) -> Self {
+        Self {
+            semi_major_axis,
+            eccentricity,
+            inclination,
+            argument_of_periapsis,
+            longitude_of_ascending_node,
+            true_anomaly,
+        }
+    }
 }
 
 fn setup(

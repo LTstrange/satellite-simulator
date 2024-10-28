@@ -1,20 +1,28 @@
 mod prelude {
     pub use bevy::prelude::*;
 
+    pub use super::utils::*;
+
     pub use std::f32::consts::PI;
     pub const EARTH_RADIUS: f32 = 6371.0; // 地球半径
 }
+use std::fs::File;
+
 use prelude::*;
 
 use camera::OrbitCameraPlugin;
 use satellite::SatellitePlugin;
-use utils::*;
 
 mod camera;
 mod satellite;
 mod utils;
 
 fn main() {
+    let data = File::open("./starlink.json").unwrap();
+    let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
+    println!("Satellite: {:?}", satellites[0]);
+    return;
+
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins((OrbitCameraPlugin, SatellitePlugin))
