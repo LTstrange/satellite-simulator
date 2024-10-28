@@ -18,11 +18,6 @@ mod satellite;
 mod utils;
 
 fn main() {
-    let data = File::open("./starlink.json").unwrap();
-    let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
-    println!("Satellite: {:?}", satellites[0]);
-    return;
-
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins((OrbitCameraPlugin, SatellitePlugin))

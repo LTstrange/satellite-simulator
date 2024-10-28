@@ -1,10 +1,12 @@
+use std::fs::File;
+
 use crate::prelude::*;
 
 pub struct SatellitePlugin;
 
 impl Plugin for SatellitePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
+        app.add_systems(Startup, (setup, setup_ellipse_orbit_data).chain())
             .add_systems(Update, draw_ellipse_orbit);
     }
 }
@@ -15,30 +17,23 @@ pub struct Satellite;
 
 #[derive(Component)]
 pub struct OrbitalElements {
-    semi_major_axis: f32,             // 半长轴
+    mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
-    inclination: f32,                 // 轨道倾角
-    argument_of_periapsis: f32,       // 近地点角距
-    longitude_of_ascending_node: f32, // 升交点赤经
-    true_anomaly: f32,                // 真近点角
+    inclination: f32,                 // 轨道倾角(rad)
+    argument_of_periapsis: f32,       // 近地点角距(rad)
+    longitude_of_ascending_node: f32, // 升交点赤经(rad)
+    mean_anomaly: f32,                // 平近点角(rad)
 }
 
-impl OrbitalElements {
-    pub fn new(
-        semi_major_axis: f32,
-        eccentricity: f32,
-        inclination: f32,
-        argument_of_periapsis: f32,
-        longitude_of_ascending_node: f32,
-        true_anomaly: f32,
-    ) -> Self {
+impl From<SatelliteData> for OrbitalElements {
+    fn from(value: SatelliteData) -> Self {
         Self {
-            semi_major_axis,
-            eccentricity,
-            inclination,
-            argument_of_periapsis,
-            longitude_of_ascending_node,
-            true_anomaly,
+            mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
+            eccentricity: value.ECCENTRICITY,
+            inclination: value.INCLINATION,
+            argument_of_periapsis: value.ARG_OF_PERICENTER,
+            longitude_of_ascending_node: value.RA_OF_ASC_NODE,
+            mean_anomaly: value.MEAN_ANOMALY,
         }
     }
 }
@@ -48,69 +43,66 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn((
-        Satellite,
-        OrbitalElements {
-            semi_major_axis: EARTH_RADIUS + 6000.,
-            eccentricity: 0.5,
-            inclination: PI / 12.,
-            argument_of_periapsis: PI / 4.,
-            longitude_of_ascending_node: PI / 6.,
-            true_anomaly: 0.,
-        },
-    ));
+    let data = File::open("./starlink.json").unwrap();
+    let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
+    for satellite in satellites {
+        let orbit_elements = OrbitalElements::from(satellite);
+        commands.spawn((Satellite, orbit_elements));
+    }
 }
 
-// fn move_satellites(time: Res<Time>, mut query: Query<(&mut Satellite, &mut Transform)>) {
-//     for (mut satellite, mut transform) in query.iter_mut() {
-//         satellite.current_time += time.delta_seconds();
-//         let mean_anomaly = (2.0 * PI / satellite.orbit_period) * satellite.current_time;
-//         // 假设一个小的近似处理，用平均近点角近似真实近点角（稍微简化了开普勒方程）
-//         let true_anomaly = mean_anomaly;
-//         // 计算卫星在轨道平面内的位置
-//         let radius = satellite.semi_major_axis * (1.0 - satellite.eccentricity.powi(2))
-//             / (1.0 + satellite.eccentricity * true_anomaly.cos());
-//         let x = radius * true_anomaly.cos();
-//         let y = radius * true_anomaly.sin();
-//         // 应用轨道倾角和近地点角距
-//         let rotated_position = Quat::from_rotation_z(satellite.argument_of_periapsis)
-//             * Quat::from_rotation_x(satellite.inclination)
-//             * Vec3::new(x, y, 0.0);
-//         transform.translation = rotated_position;
-//     }
-// }
-
-// Gizmos
-fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&OrbitalElements>) {
-    for orbit in &query {
+#[derive(Component)]
+struct EllipseOrbitData {
+    location: Vec3,
+    rotation: Quat,
+    half_size: Vec2,
+}
+const FACTOR: f32 = 73.59459595; // u^(1/3)
+fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElements>) {
+    for element in &orbits {
         // half size of the ellipse
+
+        let n = element.mean_motion.powf(-2. / 3.);
+        // a = u^(1/3) * ( n ) ^ (-2/3)
+        let semi_major_axis = FACTOR * n;
         // b = a * sqrt(1 - e^2)
-        let semi_minor_axis = orbit.semi_major_axis * (1.0 - orbit.eccentricity.powi(2)).sqrt();
-        let half_size = Vec2::new(semi_minor_axis, orbit.semi_major_axis);
+        let semi_minor_axis = semi_major_axis * (1.0 - element.eccentricity.powi(2)).sqrt();
+        let half_size = Vec2::new(semi_minor_axis, semi_major_axis);
 
         let mut transform = Transform::default();
 
         // rotation
-        transform.rotate_local_y(-orbit.inclination);
+        transform.rotate_local_y(-element.inclination);
         transform.rotate_around(
             Vec3::ZERO,
-            Quat::from_rotation_z(orbit.longitude_of_ascending_node),
+            Quat::from_rotation_z(element.longitude_of_ascending_node),
         );
         transform.rotate_around(
             Vec3::ZERO,
-            Quat::from_axis_angle(*transform.forward(), -orbit.argument_of_periapsis),
+            Quat::from_axis_angle(*transform.forward(), -element.argument_of_periapsis),
         );
 
         // position
         // e = c / a; c = e * a
-        let semi_focal_distance = orbit.semi_major_axis * orbit.eccentricity;
+        let semi_focal_distance = semi_major_axis * element.eccentricity;
         transform.translation += semi_focal_distance * transform.local_y();
 
-        gizmos.ellipse(
-            transform.translation,
-            transform.rotation,
+        commands.spawn(EllipseOrbitData {
+            location: transform.translation,
+            rotation: transform.rotation,
             half_size,
-            Color::WHITE,
+        });
+    }
+}
+
+// Gizmos
+fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&EllipseOrbitData>) {
+    for ellpise in &query {
+        gizmos.ellipse(
+            ellpise.location,
+            ellpise.rotation,
+            ellpise.half_size,
+            Color::srgba(1., 1., 1., 0.1),
         );
     }
 }

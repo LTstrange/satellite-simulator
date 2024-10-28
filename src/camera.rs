@@ -67,7 +67,7 @@ fn orbit_camera_system(
 
             orbit_camera.radius = orbit_camera
                 .radius
-                .clamp(EARTH_RADIUS * 5.0, EARTH_RADIUS * 20.0); // 限制相机的距离在合理范围内，防止相机超出地球表面
+                .clamp(EARTH_RADIUS * 2.0, EARTH_RADIUS * 20.0); // 限制相机的距离在合理范围内，防止相机超出地球表面
         }
 
         // 计算相机的新位置
