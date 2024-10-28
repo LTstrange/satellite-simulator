@@ -41,6 +41,25 @@ fn setup(
     ));
 }
 
+// fn move_satellites(time: Res<Time>, mut query: Query<(&mut Satellite, &mut Transform)>) {
+//     for (mut satellite, mut transform) in query.iter_mut() {
+//         satellite.current_time += time.delta_seconds();
+//         let mean_anomaly = (2.0 * PI / satellite.orbit_period) * satellite.current_time;
+//         // 假设一个小的近似处理，用平均近点角近似真实近点角（稍微简化了开普勒方程）
+//         let true_anomaly = mean_anomaly;
+//         // 计算卫星在轨道平面内的位置
+//         let radius = satellite.semi_major_axis * (1.0 - satellite.eccentricity.powi(2))
+//             / (1.0 + satellite.eccentricity * true_anomaly.cos());
+//         let x = radius * true_anomaly.cos();
+//         let y = radius * true_anomaly.sin();
+//         // 应用轨道倾角和近地点角距
+//         let rotated_position = Quat::from_rotation_z(satellite.argument_of_periapsis)
+//             * Quat::from_rotation_x(satellite.inclination)
+//             * Vec3::new(x, y, 0.0);
+//         transform.translation = rotated_position;
+//     }
+// }
+
 // Gizmos
 fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&OrbitalElements>) {
     for orbit in &query {
