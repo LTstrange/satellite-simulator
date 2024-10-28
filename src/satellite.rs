@@ -45,9 +45,51 @@ fn setup(
 ) {
     let data = File::open("./starlink.json").unwrap();
     let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
+
+    let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(2).unwrap());
+    let satellite_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(1., 1.0, 1.0),
+        unlit: true,
+        ..default()
+    });
     for satellite in satellites {
-        let orbit_elements = OrbitalElements::from(satellite);
-        commands.spawn((Satellite, orbit_elements));
+        let orbital = OrbitalElements::from(satellite);
+
+        let true_anomaly =
+            anomaly_mean_to_true(orbital.mean_anomaly, orbital.eccentricity).unwrap();
+        let n = orbital.mean_motion.powf(-2. / 3.);
+        let semi_major_axis = FACTOR * n;
+        // r = a(1- e^2) / (1 + e * cos(true_anomaly))
+        let radius = (1.0 - orbital.eccentricity.powi(2)) * semi_major_axis
+            / (1. + orbital.eccentricity * true_anomaly.cos());
+        println!("radius: {}", radius);
+        let location = Vec3::new(
+            radius * true_anomaly.cos(),
+            radius * true_anomaly.sin(),
+            0.0,
+        );
+
+        let mut transform = Transform::from_translation(location);
+        transform.rotate_around(Vec3::ZERO, Quat::from_rotation_y(-orbital.inclination));
+        transform.rotate_around(
+            Vec3::ZERO,
+            Quat::from_rotation_z(orbital.longitude_of_ascending_node),
+        );
+        transform.rotate_around(
+            Vec3::ZERO,
+            Quat::from_axis_angle(*transform.forward(), -orbital.argument_of_periapsis),
+        );
+
+        commands.spawn((
+            Satellite,
+            orbital,
+            PbrBundle {
+                transform,
+                mesh: satellite_mesh.clone(),
+                material: satellite_material.clone(),
+                ..default()
+            },
+        ));
     }
 }
 
@@ -57,6 +99,7 @@ struct EllipseOrbitData {
     rotation: Quat,
     half_size: Vec2,
 }
+
 const FACTOR: f32 = 73.59459595; // u^(1/3)
 fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElements>) {
     for element in &orbits {
@@ -72,6 +115,7 @@ fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElemen
         let mut transform = Transform::default();
 
         // rotation
+
         transform.rotate_local_y(-element.inclination);
         transform.rotate_around(
             Vec3::ZERO,
@@ -102,7 +146,7 @@ fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&EllipseOrbitData>) {
             ellpise.location,
             ellpise.rotation,
             ellpise.half_size,
-            Color::srgba(1., 1., 1., 0.1),
+            Color::srgba(1., 1., 1., 0.01),
         );
     }
 }

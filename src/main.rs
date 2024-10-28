@@ -6,7 +6,6 @@ mod prelude {
     pub use std::f32::consts::PI;
     pub const EARTH_RADIUS: f32 = 6371.0; // 地球半径
 }
-use std::fs::File;
 
 use prelude::*;
 
@@ -33,16 +32,16 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // 创建一个蓝色材质表示地球
-    // let earth_material = materials.add(StandardMaterial {
-    //     base_color: Color::srgb(0.0, 0.3, 0.7),
-    //     unlit: true, // 无光照
-    //     ..Default::default()
-    // });
     let earth_material = materials.add(StandardMaterial {
-        base_color_texture: Some(images.add(uv_debug_texture())),
-        unlit: true,
-        ..default()
+        base_color: Color::srgb(0.0, 0.3, 0.7),
+        unlit: true, // 无光照
+        ..Default::default()
     });
+    // let earth_material = materials.add(StandardMaterial {
+    //     base_color_texture: Some(images.add(uv_debug_texture())),
+    //     unlit: true,
+    //     ..default()
+    // });
 
     // 创建一个球体并设置其位置在原点
     commands.spawn(PbrBundle {

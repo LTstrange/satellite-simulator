@@ -56,7 +56,7 @@ use serde::{Deserialize, Serialize};
 ///     "MEAN_MOTION_DDOT":0
 /// }
 #[allow(non_snake_case)]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct SatelliteData {
     pub MEAN_MOTION: f32, // (rev/day)
     pub ECCENTRICITY: f32,
@@ -64,4 +64,38 @@ pub struct SatelliteData {
     pub RA_OF_ASC_NODE: f32,
     pub ARG_OF_PERICENTER: f32,
     pub MEAN_ANOMALY: f32,
+}
+
+pub fn anomaly_mean_to_true(anm_mean: f32, e: f32) -> Result<f32, String> {
+    // Set constants of iteration
+    let max_iter = 10;
+    let eps = 100.0 * f32::EPSILON; // Convergence with respect to data-type precision
+
+    // Initialize starting iteration values
+    let anm_mean = anm_mean % (2.0 * PI);
+    let mut anm_ecc = if e < 0.8 { anm_mean } else { PI };
+
+    let mut f = anm_ecc - e * anm_ecc.sin() - anm_mean;
+    let mut i = 0;
+
+    // Iterate until convergence
+    while f.abs() > eps {
+        f = anm_ecc - e * anm_ecc.sin() - anm_mean;
+        anm_ecc = anm_ecc - f / (1.0 - e * anm_ecc.cos());
+
+        i += 1;
+        if i > max_iter {
+            return Err(format!(
+                "Reached maximum number of iterations ({}) before convergence for (M: {}, e: {}).",
+                max_iter, anm_mean, e
+            ));
+        }
+    }
+
+    // Finish conversion from eccentric to true anomaly
+    Ok(anomaly_eccentric_to_true(anm_ecc, e))
+}
+
+pub fn anomaly_eccentric_to_true(anm_ecc: f32, e: f32) -> f32 {
+    (anm_ecc.sin() * (1.0 - e.powi(2)).sqrt()).atan2(anm_ecc.cos() - e)
 }
