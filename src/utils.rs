@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, satellite::OrbitalElements};
 
 use bevy::render::{
     render_asset::RenderAssetUsages,

@@ -7,7 +7,11 @@ pub struct SatellitePlugin;
 impl Plugin for SatellitePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, (setup, setup_ellipse_orbit_data).chain())
-            .add_systems(Update, draw_ellipse_orbit);
+            .add_systems(Update, draw_ellipse_orbit)
+            .add_systems(
+                FixedUpdate,
+                (update_mean_anomaly, update_satellite_position).chain(),
+            );
     }
 }
 
@@ -46,7 +50,7 @@ fn setup(
     let data = File::open("./starlink.json").unwrap();
     let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
 
-    let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(2).unwrap());
+    let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(1).unwrap());
     let satellite_material = materials.add(StandardMaterial {
         base_color: Color::srgb(1., 1.0, 1.0),
         unlit: true,
@@ -55,36 +59,13 @@ fn setup(
     for satellite in satellites {
         let orbital = OrbitalElements::from(satellite);
 
-        let true_anomaly =
-            anomaly_mean_to_true(orbital.mean_anomaly, orbital.eccentricity).unwrap();
-        let n = orbital.mean_motion.powf(-2. / 3.);
-        let semi_major_axis = FACTOR * n;
-        // r = a(1- e^2) / (1 + e * cos(true_anomaly))
-        let radius = (1.0 - orbital.eccentricity.powi(2)) * semi_major_axis
-            / (1. + orbital.eccentricity * true_anomaly.cos());
-        println!("radius: {}", radius);
-        let location = Vec3::new(
-            radius * true_anomaly.cos(),
-            radius * true_anomaly.sin(),
-            0.0,
-        );
-
-        let mut transform = Transform::from_translation(location);
-        transform.rotate_around(Vec3::ZERO, Quat::from_rotation_y(-orbital.inclination));
-        transform.rotate_around(
-            Vec3::ZERO,
-            Quat::from_rotation_z(orbital.longitude_of_ascending_node),
-        );
-        transform.rotate_around(
-            Vec3::ZERO,
-            Quat::from_axis_angle(*transform.forward(), -orbital.argument_of_periapsis),
-        );
+        let pos = get_position_from_orbital_elements(&orbital);
 
         commands.spawn((
             Satellite,
             orbital,
             PbrBundle {
-                transform,
+                transform: Transform::from_translation(pos),
                 mesh: satellite_mesh.clone(),
                 material: satellite_material.clone(),
                 ..default()
@@ -149,4 +130,46 @@ fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&EllipseOrbitData>) {
             Color::srgba(1., 1., 1., 0.01),
         );
     }
+}
+
+fn update_mean_anomaly(
+    mut satellites: Query<&mut OrbitalElements, With<Satellite>>,
+    time: Res<Time<Fixed>>,
+) {
+    for mut element in &mut satellites {
+        element.mean_anomaly += element.mean_motion * time.delta_seconds() * 10.;
+    }
+}
+
+fn update_satellite_position(mut satellites: Query<(&mut Transform, &OrbitalElements)>) {
+    for (mut transform, orbital) in satellites.iter_mut() {
+        transform.translation = get_position_from_orbital_elements(orbital);
+    }
+}
+
+pub fn get_position_from_orbital_elements(orbital: &OrbitalElements) -> Vec3 {
+    let true_anomaly = anomaly_mean_to_true(orbital.mean_anomaly, orbital.eccentricity).unwrap();
+    let n = orbital.mean_motion.powf(-2. / 3.);
+    let semi_major_axis = FACTOR * n;
+    // r = a(1- e^2) / (1 + e * cos(true_anomaly))
+    let radius = (1.0 - orbital.eccentricity.powi(2)) * semi_major_axis
+        / (1. + orbital.eccentricity * true_anomaly.cos());
+    // println!("radius: {}", radius);
+    let location = Vec3::new(
+        radius * true_anomaly.cos(),
+        radius * true_anomaly.sin(),
+        0.0,
+    );
+
+    let mut transform = Transform::from_translation(location);
+    transform.rotate_around(Vec3::ZERO, Quat::from_rotation_y(-orbital.inclination));
+    transform.rotate_around(
+        Vec3::ZERO,
+        Quat::from_rotation_z(orbital.longitude_of_ascending_node),
+    );
+    transform.rotate_around(
+        Vec3::ZERO,
+        Quat::from_axis_angle(*transform.forward(), -orbital.argument_of_periapsis),
+    );
+    transform.translation
 }
