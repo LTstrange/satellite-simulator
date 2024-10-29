@@ -1,6 +1,5 @@
-use std::fs::File;
-
 use chrono::Utc;
+use std::fs::File;
 
 use crate::prelude::*;
 
@@ -58,6 +57,7 @@ fn setup(
         unlit: true,
         ..default()
     });
+
     let current_time = Utc::now();
     for satellite in satellites {
         let observe_time = parse_time_from_str(&satellite.EPOCH);
@@ -104,9 +104,9 @@ fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElemen
         let mut transform = Transform::default();
 
         // rotation
-        transform.rotate_y(-element.inclination);
+        transform.rotate_x(-element.inclination);
         transform.rotate_z(element.longitude_of_ascending_node);
-        transform.rotate_local_z(-element.argument_of_periapsis + (PI / 2.));
+        transform.rotate_local_z(-element.argument_of_periapsis);
 
         // position
         // e = c / a; c = e * a
@@ -156,7 +156,6 @@ pub fn get_position_from_orbital_elements(orbital: &OrbitalElements) -> Vec3 {
     // r = a(1- e^2) / (1 + e * cos(true_anomaly))
     let radius = semi_major_axis * (1.0 - orbital.eccentricity.powi(2))
         / (1. + orbital.eccentricity * true_anomaly.cos());
-    // println!("radius: {}", radius);
     let location = Vec3::new(
         radius * true_anomaly.cos(),
         radius * true_anomaly.sin(),

@@ -59,7 +59,7 @@ fn orbit_camera_system(
         // 如果正在拖动，处理鼠标移动事件
         if orbit_camera.is_dragging {
             for event in mouse_motion_events.read() {
-                orbit_camera.azimuthal_angle -= event.delta.x * DRAG_FACTOR;
+                orbit_camera.azimuthal_angle += event.delta.x * DRAG_FACTOR;
                 orbit_camera.polar_angle += event.delta.y * DRAG_FACTOR;
 
                 // 限制极角在合理范围内，防止翻转
@@ -81,14 +81,14 @@ fn orbit_camera_system(
         // 计算相机的新位置
         let x = orbit_camera.radius
             * orbit_camera.polar_angle.cos()
-            * orbit_camera.azimuthal_angle.sin();
-        let y = orbit_camera.radius * orbit_camera.polar_angle.sin();
-        let z = orbit_camera.radius
-            * orbit_camera.polar_angle.cos()
             * orbit_camera.azimuthal_angle.cos();
+        let y = -orbit_camera.radius
+            * orbit_camera.polar_angle.cos()
+            * orbit_camera.azimuthal_angle.sin();
+        let z = orbit_camera.radius * orbit_camera.polar_angle.sin();
 
         // 设置相机的位置，并使其始终朝向地球（即原点）
-        transform.translation = Vec3::new(x, -z, y);
+        transform.translation = Vec3::new(x, y, z);
         transform.look_at(Vec3::ZERO, Vec3::Z);
     }
 }
