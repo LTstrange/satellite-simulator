@@ -63,10 +63,10 @@ pub struct SatelliteData {
     pub EPOCH: String,
     pub MEAN_MOTION: f32, // (rev/day)
     pub ECCENTRICITY: f32,
-    pub INCLINATION: f32,
-    pub RA_OF_ASC_NODE: f32,
-    pub ARG_OF_PERICENTER: f32,
-    pub MEAN_ANOMALY: f32,
+    pub INCLINATION: f32,       // (degrees)
+    pub RA_OF_ASC_NODE: f32,    // (degrees)
+    pub ARG_OF_PERICENTER: f32, // (degrees)
+    pub MEAN_ANOMALY: f32,      // (degrees)
 }
 
 pub fn anomaly_mean_to_true(anm_mean: f32, e: f32) -> Result<f32, String> {
