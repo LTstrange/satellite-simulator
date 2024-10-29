@@ -102,11 +102,12 @@ fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElemen
         let half_size = Vec2::new(semi_minor_axis, semi_major_axis);
 
         let mut transform = Transform::default();
-
         // rotation
-        transform.rotate_x(-element.inclination);
-        transform.rotate_z(element.longitude_of_ascending_node);
-        transform.rotate_local_z(-element.argument_of_periapsis);
+        transform.rotation = get_rotated_quat(
+            element.inclination,
+            element.longitude_of_ascending_node,
+            element.argument_of_periapsis,
+        );
 
         // position
         // e = c / a; c = e * a
@@ -162,13 +163,27 @@ pub fn get_position_from_orbital_elements(orbital: &OrbitalElements) -> Vec3 {
         0.0,
     );
 
+    // rotation
+    let rot = get_rotated_quat(
+        orbital.inclination,
+        orbital.longitude_of_ascending_node,
+        orbital.argument_of_periapsis,
+    );
+
+    // position
+    rot * location
+}
+
+fn get_rotated_quat(
+    inclination: f32,
+    longitude_of_ascending_node: f32,
+    argument_of_periapsis: f32,
+) -> Quat {
     let mut transform = Transform::default();
 
     // rotation
-    transform.rotate_y(-orbital.inclination);
-    transform.rotate_z(orbital.longitude_of_ascending_node);
-    transform.rotate_local_z(-orbital.argument_of_periapsis);
-
-    // position
-    transform.transform_point(location)
+    transform.rotate_x(-inclination);
+    transform.rotate_z(longitude_of_ascending_node);
+    transform.rotate_local_z(-argument_of_periapsis);
+    transform.rotation
 }
