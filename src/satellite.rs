@@ -1,4 +1,6 @@
-use std::fs::File;
+use std::{fs::File, time::Instant};
+
+use chrono::{DateTime, Utc};
 
 use crate::prelude::*;
 
@@ -56,8 +58,14 @@ fn setup(
         unlit: true,
         ..default()
     });
+    let current_time = Utc::now();
     for satellite in satellites {
-        let orbital = OrbitalElements::from(satellite);
+        let observe_time = parse_time_from_str(&satellite.EPOCH);
+
+        let duration = current_time - observe_time.unwrap();
+
+        let mut orbital = OrbitalElements::from(satellite);
+        orbital.mean_anomaly += (duration.num_seconds() as f32 * orbital.mean_motion) % (2. * PI);
 
         let pos = get_position_from_orbital_elements(&orbital);
 
@@ -138,6 +146,7 @@ fn update_mean_anomaly(
 ) {
     for mut element in &mut satellites {
         element.mean_anomaly += element.mean_motion * time.delta_seconds() * 10.;
+        element.mean_anomaly %= 2. * PI;
     }
 }
 

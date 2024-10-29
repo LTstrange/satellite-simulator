@@ -1,4 +1,4 @@
-use crate::{prelude::*, satellite::OrbitalElements};
+use crate::prelude::*;
 
 use bevy::render::{
     render_asset::RenderAssetUsages,
@@ -34,6 +34,7 @@ pub fn uv_debug_texture() -> Image {
     )
 }
 
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 /// Example of SatelliteData:
 /// {
@@ -56,8 +57,9 @@ use serde::{Deserialize, Serialize};
 ///     "MEAN_MOTION_DDOT":0
 /// }
 #[allow(non_snake_case)]
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SatelliteData {
+    pub EPOCH: String,
     pub MEAN_MOTION: f32, // (rev/day)
     pub ECCENTRICITY: f32,
     pub INCLINATION: f32,
@@ -98,4 +100,25 @@ pub fn anomaly_mean_to_true(anm_mean: f32, e: f32) -> Result<f32, String> {
 
 pub fn anomaly_eccentric_to_true(anm_ecc: f32, e: f32) -> f32 {
     (anm_ecc.sin() * (1.0 - e.powi(2)).sqrt()).atan2(anm_ecc.cos() - e)
+}
+
+pub fn parse_time_from_str(time_str: &str) -> Result<DateTime<Utc>, String> {
+    // 2024-10-27T04:10:58.101312
+    let naive_datetime = NaiveDateTime::parse_from_str(time_str, "%Y-%m-%dT%H:%M:%S%.6f");
+    match naive_datetime {
+        Ok(naive_datetime) => Ok(naive_datetime.and_utc()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_chrono() {
+        let Date = "2024-10-27T04:10:58Z";
+        let parsed_time = parse_time_from_str(Date).unwrap();
+        println!("{}", parsed_time);
+    }
 }
