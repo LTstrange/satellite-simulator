@@ -102,35 +102,23 @@ fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElemen
         let semi_minor_axis = semi_major_axis * (1.0 - element.eccentricity.powi(2)).sqrt();
         let half_size = Vec2::new(semi_minor_axis, semi_major_axis);
 
-        let mut transform = Transform::default();
+        let rotation = get_rotated_quat(
+            element.inclination,
+            element.longitude_of_ascending_node,
+            element.argument_of_periapsis,
+        );
 
-        // rotation
-        transform.rotate_x(-element.inclination); // the x-axis is 0 degree
-        transform.rotate_z(element.longitude_of_ascending_node);
-        transform.rotate_local_z(-element.argument_of_periapsis);
-
-        // position
+        // local position
         // e = c / a; c = e * a
         let semi_focal_distance = semi_major_axis * element.eccentricity;
-        transform.translation -= semi_focal_distance * transform.local_x();
+        let local_position = Vec3::new(-semi_focal_distance, 0.0, 0.0); // location on the orbital plane
+        let location = rotation * local_position; // apply rotation to local position
 
         commands.spawn(EllipseOrbitData {
-            location: transform.translation,
-            rotation: transform.rotation,
+            location,
+            rotation,
             half_size,
         });
-    }
-}
-
-// Gizmos
-fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&EllipseOrbitData>) {
-    for ellpise in &query {
-        gizmos.ellipse(
-            ellpise.location,
-            ellpise.rotation,
-            ellpise.half_size,
-            Color::srgba(1., 1., 1., 0.01),
-        );
     }
 }
 
@@ -157,19 +145,43 @@ pub fn get_position_from_orbital_elements(orbital: &OrbitalElements) -> Vec3 {
     // r = a(1- e^2) / (1 + e * cos(true_anomaly))
     let radius = semi_major_axis * (1.0 - orbital.eccentricity.powi(2))
         / (1. + orbital.eccentricity * true_anomaly.cos());
-    let location = Vec3::new(
+    let local_location = Vec3::new(
         radius * true_anomaly.cos(),
         radius * true_anomaly.sin(),
         0.0,
+    ); // location on the orbital plane
+
+    let rot = get_rotated_quat(
+        orbital.inclination,
+        orbital.longitude_of_ascending_node,
+        orbital.argument_of_periapsis,
     );
 
-    let mut transform = Transform::default();
+    rot * local_location // apply rotation
+}
+
+fn get_rotated_quat(
+    inclination: f32,
+    longitude_of_ascending_node: f32,
+    argument_of_periapsis: f32,
+) -> Quat {
+    let mut quat = Quat::IDENTITY;
 
     // rotation
-    transform.rotate_x(-orbital.inclination);
-    transform.rotate_z(orbital.longitude_of_ascending_node);
-    transform.rotate_local_z(-orbital.argument_of_periapsis);
+    quat = Quat::from_rotation_x(-inclination) * quat; // rotate_x
+    quat = Quat::from_rotation_z(longitude_of_ascending_node) * quat; // rotate_z
+    quat *= Quat::from_rotation_z(-argument_of_periapsis); // rotate_local_z
+    quat
+}
 
-    // position
-    transform.transform_point(location)
+// Gizmos
+fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&EllipseOrbitData>) {
+    for ellpise in &query {
+        gizmos.ellipse(
+            ellpise.location,
+            ellpise.rotation,
+            ellpise.half_size,
+            Color::srgba(1., 1., 1., 0.01),
+        );
+    }
 }
