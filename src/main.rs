@@ -1,6 +1,8 @@
 mod prelude {
+    pub use anyhow::Result;
     pub use bevy::prelude::*;
 
+    pub use super::config::*;
     pub use super::utils::*;
 
     pub use std::f32::consts::PI;
@@ -13,16 +15,22 @@ use camera::OrbitCameraPlugin;
 use satellite::SatellitePlugin;
 
 mod camera;
+mod config;
 mod satellite;
 mod utils;
 
-fn main() {
+fn main() -> Result<()> {
+    let mut config_path = std::env::current_dir()?;
+    config_path.push("config.toml");
+    let config = config::Config::load(&config_path)?;
     App::new()
+        .insert_resource(config)
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins((OrbitCameraPlugin, SatellitePlugin))
         .add_systems(Startup, setup)
         .add_systems(Update, (draw_axes,))
         .run();
+    Ok(())
 }
 
 fn setup(
