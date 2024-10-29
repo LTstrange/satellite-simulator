@@ -1,6 +1,6 @@
-use std::{fs::File, time::Instant};
+use std::fs::File;
 
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 
 use crate::prelude::*;
 

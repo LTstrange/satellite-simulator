@@ -4,8 +4,10 @@ use bevy::render::{
     render_asset::RenderAssetUsages,
     render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
+use chrono::{DateTime, NaiveDateTime, Utc};
 
 /// Creates a colorful test pattern
+#[allow(unused)]
 pub fn uv_debug_texture() -> Image {
     const TEXTURE_SIZE: usize = 8;
 
@@ -34,7 +36,6 @@ pub fn uv_debug_texture() -> Image {
     )
 }
 
-use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 /// Example of SatelliteData:
 /// {
@@ -117,8 +118,8 @@ mod test {
 
     #[test]
     fn test_chrono() {
-        let Date = "2024-10-27T04:10:58Z";
-        let parsed_time = parse_time_from_str(Date).unwrap();
+        let date = "2024-10-27T04:10:58Z";
+        let parsed_time = parse_time_from_str(date).unwrap();
         println!("{}", parsed_time);
     }
 }
