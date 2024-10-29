@@ -1,4 +1,4 @@
-use std::{fs::File, process::exit};
+use std::fs::File;
 
 use chrono::Utc;
 
@@ -26,8 +26,8 @@ pub struct OrbitalElements {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角(rad)
-    argument_of_periapsis: f32,       // 近地点角距(rad)
     longitude_of_ascending_node: f32, // 升交点赤经(rad)
+    argument_of_periapsis: f32,       // 近地点角距(rad)
     mean_anomaly: f32,                // 平近点角(rad)
 }
 
@@ -49,7 +49,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let data = File::open("./FENGYUN.json").unwrap();
+    let data = File::open("./starlink.json").unwrap();
     let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
 
     let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(1).unwrap());
@@ -59,12 +59,12 @@ fn setup(
         ..default()
     });
     let current_time = Utc::now();
-    for satellite in &satellites[..] {
+    for satellite in satellites {
         let observe_time = parse_time_from_str(&satellite.EPOCH);
 
         let duration = current_time - observe_time.unwrap();
 
-        let mut orbital = OrbitalElements::from(satellite.clone());
+        let mut orbital = OrbitalElements::from(satellite);
         orbital.mean_anomaly += (duration.num_seconds() as f32 * orbital.mean_motion) % (2. * PI);
 
         let pos = get_position_from_orbital_elements(&orbital);
@@ -106,13 +106,12 @@ fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElemen
         // rotation
         transform.rotate_y(-element.inclination);
         transform.rotate_z(element.longitude_of_ascending_node);
-        transform.rotate_local_z(-element.argument_of_periapsis);
-        transform.rotate_local_z(PI / 2.);
+        transform.rotate_local_z(-element.argument_of_periapsis + (PI / 2.));
 
         // position
         // e = c / a; c = e * a
         let semi_focal_distance = semi_major_axis * element.eccentricity;
-        transform.translation -= semi_focal_distance * transform.local_y();
+        transform.translation += semi_focal_distance * transform.local_y();
 
         commands.spawn(EllipseOrbitData {
             location: transform.translation,
