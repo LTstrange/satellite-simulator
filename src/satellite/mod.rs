@@ -8,6 +8,8 @@ mod orbit;
 use motion::*;
 use orbit::*;
 
+const FACTOR: f32 = 73.59459595; // u^(1/3)
+
 pub struct SatellitePlugin;
 
 impl Plugin for SatellitePlugin {
@@ -46,7 +48,48 @@ impl From<SatelliteData> for OrbitalElements {
         }
     }
 }
-const FACTOR: f32 = 73.59459595; // u^(1/3)
+
+/// Read and Setup satellite data and add them to the scene.
+fn setup(
+    mut commands: Commands,
+    config: Res<Config>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let data = File::open(&config.satellite_json).unwrap();
+    let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
+
+    let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(1).unwrap());
+    let satellite_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(1.0, 1.0, 1.0),
+        unlit: true,
+        ..default()
+    });
+
+    let current_time = Utc::now();
+    const index: usize = 1;
+    for satellite in &satellites[..] {
+        let observe_time = parse_time_from_str(&satellite.EPOCH);
+
+        let duration = current_time - observe_time.unwrap();
+
+        let mut orbital = OrbitalElements::from(satellite.clone());
+        orbital.mean_anomaly += (duration.num_seconds() as f32 * orbital.mean_motion) % (2. * PI);
+
+        let pos = get_position_from_orbital_elements(&orbital);
+
+        commands.spawn((
+            Satellite,
+            orbital,
+            PbrBundle {
+                transform: Transform::from_translation(pos),
+                mesh: satellite_mesh.clone(),
+                material: satellite_material.clone(),
+                ..default()
+            },
+        ));
+    }
+}
 
 // helper functions
 fn get_rotated_quat(
