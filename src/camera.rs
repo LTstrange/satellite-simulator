@@ -5,7 +5,7 @@ use bevy::input::mouse::{MouseButtonInput, MouseMotion, MouseWheel};
 const SCALE_FACTOR: f32 = -0.05;
 
 #[cfg(not(target_family = "windows"))]
-const SCALE_FACTOR: f32 = 0.01;
+const SCALE_FACTOR: f32 = 0.001;
 
 #[cfg(target_family = "windows")]
 const DRAG_FACTOR: f32 = 0.005;
