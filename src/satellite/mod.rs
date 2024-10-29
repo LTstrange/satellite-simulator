@@ -8,7 +8,7 @@ mod orbit;
 use motion::*;
 use orbit::*;
 
-const FACTOR: f32 = 73.59459595; // u^(1/3)
+const FACTOR: f32 = 73.594_6; // u^(1/3)
 
 pub struct SatellitePlugin;
 
@@ -67,13 +67,12 @@ fn setup(
     });
 
     let current_time = Utc::now();
-    const index: usize = 1;
-    for satellite in &satellites[..] {
+    for satellite in satellites {
         let observe_time = parse_time_from_str(&satellite.EPOCH);
 
         let duration = current_time - observe_time.unwrap();
 
-        let mut orbital = OrbitalElements::from(satellite.clone());
+        let mut orbital = OrbitalElements::from(satellite);
         orbital.mean_anomaly += (duration.num_seconds() as f32 * orbital.mean_motion) % (2. * PI);
 
         let pos = get_position_from_orbital_elements(&orbital);
