@@ -48,7 +48,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let data = File::open("./starlink.json").unwrap();
+    let data = File::open("./FENGYUN.json").unwrap();
     let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
 
     let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(1).unwrap());
@@ -59,12 +59,13 @@ fn setup(
     });
 
     let current_time = Utc::now();
-    for satellite in satellites {
+    const index: usize = 1;
+    for satellite in &satellites[..] {
         let observe_time = parse_time_from_str(&satellite.EPOCH);
 
         let duration = current_time - observe_time.unwrap();
 
-        let mut orbital = OrbitalElements::from(satellite);
+        let mut orbital = OrbitalElements::from(satellite.clone());
         orbital.mean_anomaly += (duration.num_seconds() as f32 * orbital.mean_motion) % (2. * PI);
 
         let pos = get_position_from_orbital_elements(&orbital);
@@ -102,17 +103,16 @@ fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<&OrbitalElemen
         let half_size = Vec2::new(semi_minor_axis, semi_major_axis);
 
         let mut transform = Transform::default();
+
         // rotation
-        transform.rotation = get_rotated_quat(
-            element.inclination,
-            element.longitude_of_ascending_node,
-            element.argument_of_periapsis,
-        );
+        transform.rotate_x(-element.inclination); // the x-axis is 0 degree
+        transform.rotate_z(element.longitude_of_ascending_node);
+        transform.rotate_local_z(-element.argument_of_periapsis);
 
         // position
         // e = c / a; c = e * a
         let semi_focal_distance = semi_major_axis * element.eccentricity;
-        transform.translation += semi_focal_distance * transform.local_y();
+        transform.translation -= semi_focal_distance * transform.local_x();
 
         commands.spawn(EllipseOrbitData {
             location: transform.translation,
@@ -163,27 +163,13 @@ pub fn get_position_from_orbital_elements(orbital: &OrbitalElements) -> Vec3 {
         0.0,
     );
 
-    // rotation
-    let rot = get_rotated_quat(
-        orbital.inclination,
-        orbital.longitude_of_ascending_node,
-        orbital.argument_of_periapsis,
-    );
-
-    // position
-    rot * location
-}
-
-fn get_rotated_quat(
-    inclination: f32,
-    longitude_of_ascending_node: f32,
-    argument_of_periapsis: f32,
-) -> Quat {
     let mut transform = Transform::default();
 
     // rotation
-    transform.rotate_x(-inclination);
-    transform.rotate_z(longitude_of_ascending_node);
-    transform.rotate_local_z(-argument_of_periapsis);
-    transform.rotation
+    transform.rotate_x(-orbital.inclination);
+    transform.rotate_z(orbital.longitude_of_ascending_node);
+    transform.rotate_local_z(-orbital.argument_of_periapsis);
+
+    // position
+    transform.transform_point(location)
 }
