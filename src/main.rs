@@ -3,6 +3,7 @@ mod prelude {
     pub use bevy::prelude::*;
 
     pub use super::config::*;
+    pub use super::satellite::*;
     pub use super::utils::*;
 
     pub use std::f32::consts::PI;

@@ -5,7 +5,7 @@ pub fn update_mean_anomaly(
     time: Res<Time<Fixed>>,
 ) {
     for mut element in &mut satellites {
-        element.mean_anomaly += element.mean_motion * time.delta_seconds() * 100.;
+        element.mean_anomaly += element.mean_motion * time.delta_seconds() * 1.;
         element.mean_anomaly %= 2. * PI;
     }
 }

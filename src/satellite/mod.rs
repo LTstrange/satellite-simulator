@@ -2,9 +2,11 @@ use crate::prelude::*;
 use chrono::Utc;
 use std::fs::File;
 
+mod communication;
 mod motion;
 mod orbit;
 
+use communication::*;
 use motion::*;
 use orbit::*;
 
@@ -14,6 +16,7 @@ pub struct SatellitePlugin;
 
 impl Plugin for SatellitePlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(CommunicationPlugin);
         app.add_systems(Startup, (setup, setup_ellipse_orbit_data).chain())
             .add_systems(Update, draw_ellipse_orbit);
         app.add_systems(
