@@ -6,20 +6,10 @@ pub struct CommunicationPlugin;
 
 impl Plugin for CommunicationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ConnectionRequest>()
-            .add_event::<ConnectionResponse>()
-            .add_event::<SatelliteNeedConnection>();
+        app.add_event::<ConnectTwo>();
         app.add_systems(Startup, setup.after(super::setup));
         app.add_systems(Update, draw_connections);
-        app.add_systems(
-            FixedUpdate,
-            (
-                trigger_connection_request,
-                request_connection_nearest,
-                response_connection,
-                handle_response,
-            ),
-        );
+        app.add_systems(FixedUpdate, (connect_nearest, handle_connection));
     }
 }
 
@@ -29,22 +19,9 @@ struct Connections {
 }
 
 #[derive(Event)]
-struct SatelliteNeedConnection {
-    satellite: Entity,
-    global_transform: Vec3,
-    lack: u8,
-}
-
-#[derive(Event)]
-struct ConnectionRequest {
-    from: Entity,
-    to: Entity,
-}
-
-#[derive(Event)]
-struct ConnectionResponse {
-    from: Entity,
-    to: Entity,
+struct ConnectTwo {
+    a: Entity,
+    b: Entity,
 }
 
 fn setup(mut commands: Commands, satellites: Query<Entity, With<Satellite>>) {
@@ -55,86 +32,42 @@ fn setup(mut commands: Commands, satellites: Query<Entity, With<Satellite>>) {
     }
 }
 
-/// find all satellites that need to request a connection
-/// and send (max_conn - existing_connections) times trigger events
-fn trigger_connection_request(
-    satellites: Query<(Entity, &GlobalTransform, &Connections), With<Satellite>>,
-    mut ev_sat_need_conn: EventWriter<SatelliteNeedConnection>,
+const CONNECTION_DIST: f32 = 2000.0;
+const CONNECTION_NUM: usize = 1;
+fn connect_nearest(
+    mut satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
+    mut connections: EventWriter<ConnectTwo>,
 ) {
-    for (satellite, global_trans, conn) in &satellites {
-        if conn.connections.len() < 4 {
-            ev_sat_need_conn.send(SatelliteNeedConnection {
-                satellite,
-                global_transform: global_trans.translation(),
-                lack: 4 - conn.connections.len() as u8,
-            });
+    let mut sat_pair = satellites.iter_combinations_mut();
+    let mut counter = 0;
+    while let Some([(sat1, conn1, trans1), (sat2, conn2, trans2)]) = sat_pair.fetch_next() {
+        if counter > 10 {
+            break;
+        }
+        if conn1.connections.len() < CONNECTION_NUM && conn2.connections.len() < CONNECTION_NUM {
+            let dist_sq = (trans1.translation() - trans2.translation()).length_squared();
+
+            if dist_sq < CONNECTION_DIST * CONNECTION_DIST {
+                connections.send(ConnectTwo { a: sat1, b: sat2 });
+                counter += 1;
+            }
         }
     }
 }
 
-fn request_connection_nearest(
-    mut ev_sat_need_conn: EventReader<SatelliteNeedConnection>,
-    mut ev_conn_req: EventWriter<ConnectionRequest>,
-) {
-    let satellites: Vec<(Entity, Vec3, u8)> = ev_sat_need_conn
-        .read()
-        .map(
-            |SatelliteNeedConnection {
-                 satellite,
-                 global_transform,
-                 lack,
-             }| (*satellite, *global_transform, *lack),
-        )
-        .collect();
-
-    for (satellite, global_trans, lack) in &satellites {
-        let mut other_sat_rel = satellites
-            .iter()
-            .filter_map(|(e, t, _)| {
-                if e != satellite {
-                    Some((*e, t.distance_squared(*global_trans)))
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-        other_sat_rel.sort_unstable_by(|a, b| a.1.total_cmp(&b.1));
-
-        for (other_sat, _) in &other_sat_rel[..(*lack as usize)] {
-            ev_conn_req.send(ConnectionRequest {
-                from: *satellite,
-                to: *other_sat,
-            });
-        }
-    }
-}
-
-fn response_connection(
+fn handle_connection(
     mut satellites: Query<&mut Connections, With<Satellite>>,
-    mut ev_conn_req: EventReader<ConnectionRequest>,
-    mut ev_conn_resp: EventWriter<ConnectionResponse>,
+    mut connections: EventReader<ConnectTwo>,
 ) {
-    for ConnectionRequest { from, to } in ev_conn_req.read() {
-        let mut connections = satellites.get_mut(*to).unwrap();
-        if connections.connections.len() < 4 {
-            connections.connections.push(*from);
-            ev_conn_resp.send(ConnectionResponse {
-                from: *to,
-                to: *from,
-            });
-        }
+    for ConnectTwo { a, b } in connections.read() {
+        let mut conn1 = satellites.get_mut(*a).unwrap();
+        conn1.connections.push(*b);
+        let mut conn2 = satellites.get_mut(*b).unwrap();
+        conn2.connections.push(*a);
     }
 }
 
-fn handle_response(
-    mut ev_conn_resp: EventReader<ConnectionResponse>,
-    mut satellites: Query<&mut Connections, With<Satellite>>,
-) {
-    for ConnectionResponse { from, to } in ev_conn_resp.read() {
-        let mut connections = satellites.get_mut(*from).unwrap();
-        connections.connections.push(*from);
-    }
-}
+/// GIZMOS
 
 fn draw_connections(
     mut gizmos: Gizmos,
@@ -145,7 +78,6 @@ fn draw_connections(
         for other_sat in &connections.connections {
             let end = satellites.get(*other_sat).unwrap().1.translation();
             gizmos.arrow(start, end, YELLOW);
-            println!("connection: {} -> {}", start, end);
         }
     }
 }
