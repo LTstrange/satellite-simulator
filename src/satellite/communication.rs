@@ -4,10 +4,18 @@ pub struct CommunicationPlugin;
 
 impl Plugin for CommunicationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ConnectTwo>();
+        app.add_event::<ConnectTwo>().add_event::<Breaktwo>();
         app.add_systems(Startup, setup.after(super::setup));
         app.add_systems(Update, draw_connections);
-        app.add_systems(FixedUpdate, (connect_nearest, handle_connection));
+        app.add_systems(
+            FixedUpdate,
+            (
+                connect_nearest,
+                handle_connection,
+                break_farthest,
+                handle_connection_break,
+            ),
+        );
     }
 }
 
@@ -22,6 +30,12 @@ struct ConnectTwo {
     to: Entity,
 }
 
+#[derive(Event)]
+struct Breaktwo {
+    from: Entity,
+    to: Entity,
+}
+
 fn setup(mut commands: Commands, satellites: Query<Entity, With<Satellite>>) {
     for satellite in &satellites {
         commands.entity(satellite).insert(Connections {
@@ -30,7 +44,7 @@ fn setup(mut commands: Commands, satellites: Query<Entity, With<Satellite>>) {
     }
 }
 
-const CONNECTION_DIST: f32 = 6000.0;
+const CONNECTION_DIST: f32 = 2000.0;
 const CONNECTION_NUM: usize = 4;
 fn connect_nearest(
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
@@ -75,16 +89,52 @@ fn handle_connection(
     }
 }
 
+fn break_farthest(
+    satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
+    mut ev_break: EventWriter<Breaktwo>,
+) {
+    for (sat, conns, trans) in &satellites {
+        let cur_loc = trans.translation();
+        for other_sat in conns.connections.clone() {
+            // guarantee not to break the same connection twice
+            if sat > other_sat {
+                continue;
+            }
+            // break the connection which exceeds the connection distance
+            let other_loc = satellites.get(other_sat).unwrap().2.translation();
+            if other_loc.distance_squared(cur_loc) > CONNECTION_DIST * CONNECTION_DIST {
+                ev_break.send(Breaktwo {
+                    from: sat,
+                    to: other_sat,
+                });
+            }
+        }
+    }
+}
+
+fn handle_connection_break(
+    mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
+    mut connections: EventReader<Breaktwo>,
+) {
+    for Breaktwo { from, to } in connections.read() {
+        let mut from_conn = satellites.get_mut(*from).unwrap().1;
+        from_conn.connections.retain(|&sat| sat != *to);
+
+        let mut to_conn = satellites.get_mut(*to).unwrap().1;
+        to_conn.connections.retain(|&sat| sat != *from);
+    }
+}
+
 /// GIZMOS
 
 fn draw_connections(
     mut gizmos: Gizmos,
-    satellites: Query<(Entity, &GlobalTransform, &Connections), With<Satellite>>,
+    satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
 ) {
-    for (_, global_trans, connections) in &satellites {
+    for (_, connections, global_trans) in &satellites {
         let start = global_trans.translation();
         for other_sat in &connections.connections {
-            let end = satellites.get(*other_sat).unwrap().1.translation();
+            let end = satellites.get(*other_sat).unwrap().2.translation();
             gizmos.arrow(
                 start,
                 end,
