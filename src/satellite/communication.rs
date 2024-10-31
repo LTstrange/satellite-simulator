@@ -52,31 +52,31 @@ fn setup(mut commands: Commands, satellites: Query<Entity, With<Satellite>>) {
 
 fn mark_satellites_try_connect(
     mut commands: Commands,
+    config: Res<Config>,
     satellites: Query<(Entity, &Connections), (With<Satellite>, Without<TryConnect>)>,
 ) {
     let mut rng = thread_rng();
-    let part_of_sats_num = satellites.iter().count() / (CONNECTION_NUM + 1);
+    let part_of_sats_num = satellites.iter().count() / (config.Simulation.connection_number + 1);
     for sat in satellites
         .iter()
         .filter_map(|(s, c)| {
             // filter out satellites that already saturate their connections
-            if c.connections.len() < CONNECTION_NUM
-                && rng.gen::<f32>() < 1. / (CONNECTION_NUM + 1) as f32
+            if c.connections.len() < config.Simulation.connection_number
+                && rng.gen::<f32>() < 1. / (config.Simulation.connection_number + 1) as f32
             {
                 Some(s)
             } else {
                 None
             }
         })
-        .take(part_of_sats_num.min(500))
+        .take(part_of_sats_num.min(2000))
     {
         commands.entity(sat).insert(TryConnect);
     }
 }
 
-const CONNECTION_DIST: f32 = 2000.0;
-const CONNECTION_NUM: usize = 4;
 fn connect_nearest(
+    config: Res<Config>,
     mut commands: Commands,
     from_satellites: Query<
         (Entity, &Connections, &GlobalTransform),
@@ -88,6 +88,8 @@ fn connect_nearest(
     >,
     mut connections: EventWriter<ConnectTwo>,
 ) {
+    let connection_num = config.Simulation.connection_number;
+    let connection_dist = config.Simulation.connection_distance;
     let from_sats_iter = from_satellites
         .into_iter()
         // global transform to global coordinates
@@ -96,7 +98,7 @@ fn connect_nearest(
     let to_satellies_iter = to_satellites
         .into_iter()
         // filter out satellites that already saturate their connections
-        .filter(|(_, conn, _)| conn.connections.len() < CONNECTION_NUM)
+        .filter(|(_, conn, _)| conn.connections.len() < connection_num)
         // global transform to global coordinates
         .map(|(sat, conn, trans)| (sat, conn, trans.translation()))
         .collect::<Vec<_>>();
@@ -107,12 +109,12 @@ fn connect_nearest(
         let mut other_satellites: Vec<_> = to_satellies_iter
             .iter()
             .map(|(s, c, t)| (s, c, t.distance_squared(cur_pos)))
-            .filter(|(_, _, t)| *t < CONNECTION_DIST * CONNECTION_DIST)
+            .filter(|(_, _, t)| *t < connection_dist * connection_dist)
             .collect();
         // sort by distance to the current satellite
         other_satellites.sort_unstable_by(|a, b| a.2.total_cmp(&b.2));
 
-        let count = CONNECTION_NUM - cur_conn.connections.len();
+        let count = connection_num - cur_conn.connections.len();
         for (&other_sat, _, _) in &other_satellites[..count.min(other_satellites.len())] {
             connections.send(ConnectTwo {
                 from: cur_sat,
@@ -126,21 +128,22 @@ fn connect_nearest(
 
 /// Connect two satellites, based on Connection Events
 fn handle_connection(
+    config: Res<Config>,
     mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
     mut connections: EventReader<ConnectTwo>,
 ) {
     for ConnectTwo { from, to } in connections.read() {
         // println!("Connected {} and {}", from, to);
-        let mut to_conn = satellites.get_mut(*to).unwrap().1;
-        if to_conn.connections.len() >= CONNECTION_NUM {
+        let mut to_conn: Mut<'_, Connections> = satellites.get_mut(*to).unwrap().1;
+        if to_conn.connections.len() >= config.Simulation.connection_number {
             continue;
         }
         to_conn.connections.push(*from);
-        assert!(to_conn.connections.len() <= CONNECTION_NUM);
+        assert!(to_conn.connections.len() <= config.Simulation.connection_number);
 
         let mut from_conn = satellites.get_mut(*from).unwrap().1;
         from_conn.connections.push(*to);
-        assert!(from_conn.connections.len() <= CONNECTION_NUM);
+        assert!(from_conn.connections.len() <= config.Simulation.connection_number);
     }
 }
 
@@ -161,7 +164,9 @@ fn break_farthest(
             let other_loc = satellites.get(other_sat).unwrap().2.translation();
             let dis_sq = other_loc.distance_squared(cur_loc);
             // break the connection which exceeds the connection distance
-            if dis_sq > CONNECTION_DIST * CONNECTION_DIST {
+            if dis_sq
+                > config.Simulation.connection_distance * config.Simulation.connection_distance
+            {
                 ev_break.send(Breaktwo {
                     from: sat,
                     to: other_sat,
@@ -169,7 +174,7 @@ fn break_farthest(
             }
 
             // randomly choose the farthest connections to break
-            if conns.connections.len() == CONNECTION_NUM
+            if conns.connections.len() == config.Simulation.connection_number
                 && rng.gen::<f32>() < 1e-4 * config.Simulation.time_speed
             {
                 let mut break_sat = None;

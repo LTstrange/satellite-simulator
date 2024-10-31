@@ -25,6 +25,8 @@ pub struct Display {
 #[derive(Deserialize)]
 pub struct Simulation {
     pub time_speed: f32,
+    pub connection_distance: f32,
+    pub connection_number: usize,
 }
 
 impl Config {

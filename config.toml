@@ -1,5 +1,5 @@
 [Dataset]
-constellation_file = "./starlink.json"
+constellation_file = "./FENGYUN.json"
 
 [Display]
 orbit = true
@@ -7,3 +7,5 @@ connection = true
 
 [Simulation]
 time_speed = 1.0
+connection_distance = 2000.0
+connection_number = 4
