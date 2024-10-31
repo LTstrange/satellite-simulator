@@ -5,7 +5,25 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Resource)]
 pub struct Config {
-    pub satellite_json: String,
+    pub Dataset: Dataset,
+    pub Display: Display,
+    pub Simulation: Simulation,
+}
+
+#[derive(Deserialize)]
+pub struct Dataset {
+    pub constellation_file: String,
+}
+
+#[derive(Deserialize)]
+pub struct Display {
+    pub orbit: bool,
+    pub connection: bool,
+}
+
+#[derive(Deserialize)]
+pub struct Simulation {
+    pub time_speed: f32,
 }
 
 impl Config {

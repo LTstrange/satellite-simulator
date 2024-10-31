@@ -59,7 +59,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let data = File::open(&config.satellite_json).unwrap();
+    let data = File::open(&config.Dataset.constellation_file).unwrap();
     let satellites: Vec<SatelliteData> = serde_json::from_reader(data).unwrap();
 
     let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(1).unwrap());

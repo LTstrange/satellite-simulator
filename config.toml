@@ -1,1 +1,9 @@
-satellite_json = "./starlink.json"
+[Dataset]
+constellation_file = "./starlink.json"
+
+[Display]
+orbit = true
+connection = true
+
+[Simulation]
+time_speed = 1.0

@@ -38,7 +38,14 @@ pub fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<(Entity, &
 }
 
 // Gizmos
-pub fn draw_ellipse_orbit(mut gizmos: Gizmos, query: Query<&EllipseOrbitData>) {
+pub fn draw_ellipse_orbit(
+    config: Res<Config>,
+    mut gizmos: Gizmos,
+    query: Query<&EllipseOrbitData>,
+) {
+    if !config.Display.orbit {
+        return;
+    }
     for ellpise in &query {
         gizmos.ellipse(
             ellpise.location,

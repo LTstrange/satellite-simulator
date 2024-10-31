@@ -1,11 +1,13 @@
 use super::*;
 
 pub fn update_mean_anomaly(
+    config: Res<Config>,
     mut satellites: Query<&mut OrbitalElements, With<Satellite>>,
     time: Res<Time<Fixed>>,
 ) {
     for mut element in &mut satellites {
-        element.mean_anomaly += element.mean_motion * time.delta_seconds() * TIME_SPEED;
+        element.mean_anomaly +=
+            element.mean_motion * time.delta_seconds() * config.Simulation.time_speed;
         element.mean_anomaly %= 2. * PI;
     }
 }

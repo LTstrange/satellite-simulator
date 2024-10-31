@@ -145,6 +145,7 @@ fn handle_connection(
 }
 
 fn break_farthest(
+    config: Res<Config>,
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
     mut ev_break: EventWriter<Breaktwo>,
 ) {
@@ -168,7 +169,9 @@ fn break_farthest(
             }
 
             // randomly choose the farthest connections to break
-            if conns.connections.len() == CONNECTION_NUM && rng.gen::<f32>() < 1e-4 * TIME_SPEED {
+            if conns.connections.len() == CONNECTION_NUM
+                && rng.gen::<f32>() < 1e-4 * config.Simulation.time_speed
+            {
                 let mut break_sat = None;
                 let mut max_distance = 0.0;
 
@@ -207,9 +210,13 @@ fn handle_connection_break(
 /// GIZMOS
 
 fn draw_connections(
+    config: Res<Config>,
     mut gizmos: Gizmos,
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
 ) {
+    if !config.Display.connection {
+        return;
+    }
     for (_, connections, global_trans) in &satellites {
         let start = global_trans.translation();
         for other_sat in &connections.connections {
