@@ -3,6 +3,7 @@ use std::{io::Read, path::Path};
 use crate::prelude::*;
 use serde::Deserialize;
 
+#[allow(non_snake_case)]
 #[derive(Deserialize, Resource)]
 pub struct Config {
     pub Dataset: Dataset,
