@@ -8,6 +8,7 @@ mod prelude {
 
     pub use std::f32::consts::PI;
     pub const EARTH_RADIUS: f32 = 6371.0; // 地球半径
+    pub const TIME_SPEED: f32 = 1.0;
 }
 
 use prelude::*;

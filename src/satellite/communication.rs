@@ -1,3 +1,5 @@
+use rand::{thread_rng, Rng};
+
 use crate::prelude::*;
 
 pub struct CommunicationPlugin;
@@ -52,24 +54,27 @@ fn mark_satellites_try_connect(
     mut commands: Commands,
     satellites: Query<(Entity, &Connections), (With<Satellite>, Without<TryConnect>)>,
 ) {
+    let mut rng = thread_rng();
     let part_of_sats_num = satellites.iter().count() / (CONNECTION_NUM + 1);
     for sat in satellites
         .iter()
         .filter_map(|(s, c)| {
             // filter out satellites that already saturate their connections
-            if c.connections.len() < CONNECTION_NUM {
+            if c.connections.len() < CONNECTION_NUM
+                && rng.gen::<f32>() < 1. / (CONNECTION_NUM + 1) as f32
+            {
                 Some(s)
             } else {
                 None
             }
         })
-        .take(100.min(part_of_sats_num))
+        .take(part_of_sats_num.min(500))
     {
         commands.entity(sat).insert(TryConnect);
     }
 }
 
-const CONNECTION_DIST: f32 = 1000.0;
+const CONNECTION_DIST: f32 = 2000.0;
 const CONNECTION_NUM: usize = 4;
 fn connect_nearest(
     mut commands: Commands,
@@ -143,6 +148,7 @@ fn break_farthest(
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
     mut ev_break: EventWriter<Breaktwo>,
 ) {
+    let mut rng = rand::thread_rng();
     for (sat, conns, trans) in &satellites {
         let cur_loc = trans.translation();
         for other_sat in conns.connections.clone() {
@@ -159,6 +165,27 @@ fn break_farthest(
                     from: sat,
                     to: other_sat,
                 });
+            }
+
+            // randomly choose the farthest connections to break
+            if conns.connections.len() == CONNECTION_NUM && rng.gen::<f32>() < 1e-4 * TIME_SPEED {
+                let mut break_sat = None;
+                let mut max_distance = 0.0;
+
+                for other_sat in &conns.connections {
+                    let other_sat_loc = satellites.get(*other_sat).unwrap().2.translation();
+                    let dis_sq = other_sat_loc.distance_squared(cur_loc);
+                    if dis_sq > max_distance {
+                        max_distance = dis_sq;
+                        break_sat = Some(*other_sat);
+                    }
+                }
+                if let Some(break_sat) = break_sat {
+                    ev_break.send(Breaktwo {
+                        from: sat,
+                        to: break_sat,
+                    });
+                }
             }
         }
     }
@@ -194,7 +221,7 @@ fn draw_connections(
                     red: 1.0,
                     green: 1.0,
                     blue: 0.0,
-                    alpha: 0.5,
+                    alpha: 0.2,
                 },
             );
         }
@@ -203,7 +230,6 @@ fn draw_connections(
 
 #[cfg(test)]
 mod test {
-    use super::*;
 
     #[test]
     fn test_iter() {
