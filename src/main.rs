@@ -1,6 +1,7 @@
 mod prelude {
     pub use anyhow::Result;
     pub use bevy::prelude::*;
+    pub use serde::Deserialize;
 
     pub use super::config::*;
     pub use super::satellite::*;

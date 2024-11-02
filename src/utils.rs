@@ -36,7 +36,6 @@ pub fn uv_debug_texture() -> Image {
     )
 }
 
-use serde::{Deserialize, Serialize};
 /// Example of SatelliteData:
 /// {
 ///     "OBJECT_NAME":"STARLINK-1008",
@@ -58,7 +57,7 @@ use serde::{Deserialize, Serialize};
 ///     "MEAN_MOTION_DDOT":0
 /// }
 #[allow(non_snake_case)]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct SatelliteData {
     pub EPOCH: String,
     pub MEAN_MOTION: f32, // (rev/day)
