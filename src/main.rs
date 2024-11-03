@@ -14,10 +14,12 @@ mod prelude {
 use prelude::*;
 
 use camera::OrbitCameraPlugin;
+use control::ControlPlugin;
 use satellite::SatellitePlugin;
 
 mod camera;
 mod config;
+mod control;
 mod satellite;
 mod utils;
 
@@ -28,7 +30,7 @@ fn main() -> Result<()> {
     App::new()
         .insert_resource(config)
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-        .add_plugins((OrbitCameraPlugin, SatellitePlugin))
+        .add_plugins((OrbitCameraPlugin, SatellitePlugin, ControlPlugin))
         .add_systems(Startup, setup)
         .add_systems(Update, (draw_axes,))
         .run();
