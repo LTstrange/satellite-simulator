@@ -8,6 +8,7 @@ pub struct Config {
     pub Dataset: Dataset,
     pub Display: Display,
     pub Simulation: Simulation,
+    pub Network: Network,
 }
 
 #[derive(Deserialize)]
@@ -26,6 +27,11 @@ pub struct Simulation {
     pub time_speed: f32,
     pub connection_distance: f32,
     pub connection_number: usize,
+}
+
+#[derive(Deserialize)]
+pub struct Network {
+    pub port: u16,
 }
 
 impl Config {

@@ -1,6 +1,9 @@
 [Dataset]
 constellation_file = "./FENGYUN.json"
 
+[Network]
+port = 12340
+
 [Display]
 orbit = true
 connection = true
