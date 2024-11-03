@@ -117,7 +117,7 @@ mod test {
 
     #[test]
     fn test_chrono() {
-        let date = "2024-10-27T04:10:58Z";
+        let date = "2024-10-27T04:10:58.101312";
         let parsed_time = parse_time_from_str(date).unwrap();
         println!("{}", parsed_time);
     }
