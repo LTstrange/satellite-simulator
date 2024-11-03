@@ -1,13 +1,18 @@
+use async_channel::{Receiver, Sender};
 use async_net::TcpListener;
+use bevy::tasks::{futures_lite::prelude::*, IoTaskPool};
 
 use crate::prelude::*;
-use async_channel::{Receiver, Sender};
-use bevy::tasks::{futures_lite::prelude::*, IoTaskPool};
+
 pub struct ControlPlugin;
 
 impl Plugin for ControlPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, (setup,));
+        app.add_systems(
+            FixedUpdate,
+            (handle_net_updates, tell_the_net_task_what_to_do),
+        );
     }
 }
 
@@ -17,14 +22,18 @@ struct MyNetChannel {
     rx_reponse: Receiver<NetResponse>,
 }
 
-enum NetControl {
-    GetAllPositions,
-}
+/// Get control messages which change simulator's state
+///
+/// Example:
+///     Connect two pecific Sats.
+///     Get all sats locations.
+///     Make GroundStation send data through sats.
+enum NetControl {}
 
-enum NetResponse {
-    Positions(Vec<Vec3>),
-    ControlResult(bool),
-}
+/// Messages send out
+///
+/// For example, let outside python code collect data.
+enum NetResponse {}
 
 fn setup(mut commands: Commands, config: Res<Config>) {
     let (tx_control, rx_control) = async_channel::unbounded();
@@ -41,6 +50,20 @@ fn setup(mut commands: Commands, config: Res<Config>) {
         tx_control,
         rx_reponse: rx_response,
     });
+}
+
+fn handle_net_updates(my_channels: Res<MyNetChannel>) {
+    // Non-blocking check for any new messages on the channel
+    while let Ok(msg) = my_channels.rx_reponse.try_recv() {
+        // TODO: do something with `msg`
+    }
+}
+
+fn tell_the_net_task_what_to_do(my_channels: Res<MyNetChannel>) {
+    // if let Err(e) = my_channels.tx_control.try_send(NetControl) {
+    //     // TODO: handle errors. Maybe our task has
+    //     // returned or panicked, and closed the channel?
+    // }
 }
 
 async fn netcode(rx_control: Receiver<NetControl>, tx_response: Sender<NetResponse>, port: u16) {
