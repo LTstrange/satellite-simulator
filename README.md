@@ -1,56 +1,62 @@
-# 卫星模拟器
+# Satellite Simulator
 
-## 项目简介
-这是一个基于 [Bevy](https://bevyengine.org/) 引擎开发的卫星通信模拟器，旨在模拟卫星绕地球的真实轨迹、通信链路、计算卸载等功能。该项目可以用于卫星通信网络等领域，提供了直观的 3D 可视化界面，帮助用户更好地理解卫星运行轨道和通信链路。并可以通过网络接口获取数据、输入指令，让用户可以基于模拟器生成的数据展开进一步的研究。
+## Project Overview
+This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a realistic simulation of satellite orbits around Earth, covering essential functions such as communication links, computation offloading, and energy consumption. Designed to support research in satellite communication networks, it provides an intuitive 3D visualization interface that allows users to clearly observe satellite operations and communication pathways. Future updates will enable data retrieval and command inputs through a network interface, giving users access to real-time simulation data for further research and analysis.
 
-## 功能
-- **卫星轨道模拟**：支持导入TLE格式的卫星数据，由此模拟卫星轨道。[WIP：目前仅支持json格式]
-- **卫星轨道显示**：可视化显示卫星的轨道路径。
-- **轨道相机**：支持旋转和缩放视角。
-- **实时卫星通信链路**：模拟卫星之间的通信链接及信号延迟[WIP]。
+## Features
+- **Satellite Orbit Simulation**: Supports the import of satellite data in JSON format to simulate realistic orbital paths.
+- **Orbit Visualization**: Displays the precise orbital trajectories of satellites in an interactive view.
+- **Orbit Camera**: Enables rotation and zoom controls, allowing users to adjust their perspective.
+- **Real-Time Satellite Communication Links**: Simulates the dynamic establishment and disconnection of communication links between satellites.
 
-## 安装
+## Installation
 
-1. **克隆仓库**：
+1. **Clone the Repository**
+   Begin by cloning the repository:
    ```bash
    git clone https://github.com/LTstrange/satellite-simulator.git
    cd satellite-simulator
    ```
-2. **安装 Rust 工具链**：
-   如果还未安装 Rust，可跟随Rust官方[安装指引](https://www.rust-lang.org/tools/install)。
-3. **运行项目**：
+2. **Install the Rust Toolchain**
+   If Rust is not yet installed, follow the official [installation guide](https://www.rust-lang.org/tools/install) to set up the Rust toolchain.
+3. **Build the Project**
+   Compile the project:
+   ```bash
+   cargo build
+   ```
+4. **Run the Simulator**
+   Start the simulator by running:
    ```bash
    cargo run
    ```
 
-## 使用方法
+## Usage
 
-- **视角控制**：
-   - Windows: 按住鼠标左键并拖动以旋转视角，鼠标滚轮缩放画面。
-   - MacOS: 双指滑动旋转视角，两指捏合缩放。
-- **轨迹展示**：卫星轨道会以白色显示，卫星位置会随时间模拟移动。
-- **链路显示**：卫星间链接（ISL）以黄色双向箭头显示。链路以默认方法（最近邻）链接，并在超距后断开。
-- **配置文件**：使用`config.toml`文件配置程序行为。
+- **View Controls**
+   - Windows: Hold the left mouse button and drag to rotate the view; use the mouse wheel to zoom.
+   - MacOS: Use two-finger swipe to rotate the view and pinch to zoom.
+- **Orbit Display**: Satellite orbits are displayed in white, with satellite positions dynamically updated over time.
+- **Link Display**: Inter-satellite links (ISL) are shown as yellow bidirectional arrows. Satellites connect to their nearest neighbors by default, with links breaking once they exceed the communication range.
+- **Configuration File**: Use the `config.toml` file to customize simulator settings.
 
-## 配置文件 ( `config.toml` )
-   *修改配置文件* 是设置模拟器 *整体行为* 的方式，通过配置文件，可以设置：
-   - [Dataset]：用于配置卫星星座的数据集
-      - constellation_file：指向星座数据集的相对地址
-   - [Display]：用于配置显示相关设置
-      - orbit：是否启用轨道显示
-      - connection：是否启用ISL显示
-   - [Simulation]：用于配置模拟相关参数
-      - time_speed：配置时间流速倍率。倍率通过调整时间片大小实现，不会使模拟卡顿。但时间片过大可能会导致模拟精度下降。
-      - connection_distance：ISL链接最大距离
-      - connection_number：每颗卫星最大ISL链接数量
-   配置文件必须与可执行文件处于同一目录下。
+## Configuration File (`config.toml`)
+   The config.toml file allows for configuring the simulator’s overall behavior. The following settings can be adjusted within the configuration file:
+   - [Dataset]: Defines satellite constellation data settings.
+      - constellation_file：Specifies the relative path to the constellation dataset.
+   - [Display]: Controls display-related settings.
+      - orbit: Enables or disables orbit display.
+      - connection: Enables or disables ISL (Inter-Satellite Link) display.
+   - [Simulation]: Configures simulation parameters.
+      - time_speed：This multiplier adjusts the time step size without causing simulation lag; however, setting it too high may reduce simulation accuracy.
+      - connection_distance: Specifies the maximum distance for ISL connections.
+      - connection_number: Defines the maximum number of ISL connections per satellite.
+   Ensure that the `config.toml` is located in the same directory as the executable file.
 
+## Future Work
+- **Communication Link Simulation**: Simulate transmission delays and signal interference between satellite communication links.
+- **Computation Offloading Simulation**: Model the computational resources available on satellites.
+- **Energy Simulation**: Implement energy modeling to account for power consumption due to transmissions and computations, along with solar energy recharging for satellites.
+- **Control Interface**: Enable command input via a network interface to allow detailed adjustments, such as assigning computation tasks to specific satellites or configuring routing algorithms.
 
-## 未来工作
-- **通信链路模拟**：支持卫星之间的通信链路动态显示，包括信号延迟和链路干扰。
-- **计算卸载模拟**：支持模拟卫星的计算资源。
-- **能源模拟**：支持电量模拟，模拟因传输和计算导致的能源损耗，与太阳能充能。
-- **程序操控接口**：支持从网络接口读取命令，并进行相应 *精细* 设置与调整。例如，给特定卫星分配计算任务，给卫星设置路由算法等。
-
-## 贡献
-欢迎任何形式的贡献！请先 Fork 本仓库并提交 Pull Request，或提交issues。
+## Contributing
+All contributions are welcome! Please begin by forking this repository and submitting a pull request, or open an issue to start a discussion.
