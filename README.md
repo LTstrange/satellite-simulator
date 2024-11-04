@@ -53,7 +53,7 @@ This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a re
    Ensure that the `config.toml` is located in the same directory as the executable file.
 
 ## Future Work
-- **Communication Link Simulation**: Simulate transmission delays and signal interference between satellite communication links.
+- **Enhanced Communication Link Modeling**: Add simulations for transmission delays and signal interference within established satellite links.
 - **Computation Offloading Simulation**: Model the computational resources available on satellites.
 - **Energy Simulation**: Implement energy modeling to account for power consumption due to transmissions and computations, along with solar energy recharging for satellites.
 - **Control Interface**: Enable command input via a network interface to allow detailed adjustments, such as assigning computation tasks to specific satellites or configuring routing algorithms.
