@@ -1,4 +1,4 @@
-use rand::{distributions::Uniform, prelude::Distribution, thread_rng};
+use rand::{distributions::Distribution, distributions::Uniform, seq::SliceRandom, thread_rng};
 
 use crate::prelude::*;
 
@@ -63,22 +63,36 @@ fn mark_satellites_try_connect(
     satellites: Query<(Entity, &Connections), (With<Satellite>, Without<TryConnect>)>,
 ) {
     let mut rng = thread_rng();
-    let uniform = Uniform::new(0.0, 1.0);
-    let part_of_sats_num = satellites.iter().count() / (config.Simulation.connection_number + 1);
-    for sat in satellites
+
+    // debug
+    let empty_sats = satellites
+        .iter()
+        .filter(|(_, c)| c.connections.len() == 0)
+        .collect::<Vec<_>>();
+    if empty_sats.len() != 0 {
+        info!("Empty satellites: {:?}", empty_sats.len());
+    }
+
+    // filter out satellites that already saturate their connections
+    let mut unfull_satellites = satellites
         .iter()
         .filter_map(|(s, c)| {
             // filter out satellites that already saturate their connections
-            if c.connections.len() < config.Simulation.connection_number
-                && uniform.sample(&mut rng) < 1. / (config.Simulation.connection_number + 1) as f32
-            {
-                Some(s)
+            if c.connections.len() < config.Simulation.connection_number {
+                Some((s, c.connections.len()))
             } else {
                 None
             }
         })
-        .take(part_of_sats_num.max(2000))
-    {
+        .collect::<Vec<_>>();
+
+    // try to make sure one sat could connect to `connection_number` satellites
+    let part_of_unfull_sats_num =
+        unfull_satellites.len() / (config.Simulation.connection_number + 1);
+
+    unfull_satellites.shuffle(&mut rng); // O(n)
+    unfull_satellites.sort_unstable_by_key(|(_, c)| *c); // O(n * log(connection_number)) ~ O(n)
+    for &(sat, _) in unfull_satellites.iter().take(part_of_unfull_sats_num) {
         commands.entity(sat).insert(TryConnect);
     }
 }
