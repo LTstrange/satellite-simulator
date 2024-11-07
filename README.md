@@ -12,19 +12,23 @@ This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a re
 ## Installation
 
 1. **Clone the Repository**
+
    Begin by cloning the repository:
    ```bash
    git clone https://github.com/LTstrange/satellite-simulator.git
    cd satellite-simulator
    ```
 2. **Install the Rust Toolchain**
+
    If Rust is not yet installed, follow the official [installation guide](https://www.rust-lang.org/tools/install) to set up the Rust toolchain.
 3. **Build the Project**
+
    Compile the project:
    ```bash
    cargo build
    ```
 4. **Run the Simulator**
+
    Start the simulator by running:
    ```bash
    cargo run
@@ -41,15 +45,15 @@ This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a re
 
 ## Configuration File (`config.toml`)
    The config.toml file allows for configuring the simulator’s overall behavior. The following settings can be adjusted within the configuration file:
-   - [Dataset]: Defines satellite constellation data settings.
-      - constellation_file：Specifies the relative path to the constellation dataset.
-   - [Display]: Controls display-related settings.
-      - orbit: Enables or disables orbit display.
-      - connection: Enables or disables ISL (Inter-Satellite Link) display.
-   - [Simulation]: Configures simulation parameters.
-      - time_speed：This multiplier adjusts the time step size without causing simulation lag; however, setting it too high may reduce simulation accuracy.
-      - connection_distance: Specifies the maximum distance for ISL connections.
-      - connection_number: Defines the maximum number of ISL connections per satellite.
+   - **[Dataset]**: Defines satellite constellation data settings.
+      - **constellation_file**：Specifies the relative path to the constellation dataset.
+   - **[Display]**: Controls display-related settings.
+      - **orbit**: Enables or disables orbit display.
+      - **connection**: Enables or disables ISL (Inter-Satellite Link) display.
+   - **[Simulation]**: Configures simulation parameters.
+      - **time_speed**：This multiplier adjusts the time step size without causing simulation lag; however, setting it too high may reduce simulation accuracy.
+      - **connection_distance**: Specifies the maximum distance for ISL connections.
+      - **connection_number**: Defines the maximum number of ISL connections per satellite.
    Ensure that the `config.toml` is located in the same directory as the executable file.
 
 ## Future Work
