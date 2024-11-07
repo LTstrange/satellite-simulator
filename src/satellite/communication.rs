@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::{distributions::Uniform, prelude::Distribution, thread_rng};
 
 use crate::prelude::*;
 
@@ -6,9 +6,16 @@ pub struct CommunicationPlugin;
 
 impl Plugin for CommunicationPlugin {
     fn build(&self, app: &mut App) {
+        // Events
         app.add_event::<ConnectTwo>().add_event::<Breaktwo>();
+
+        // Setup
         app.add_systems(Startup, setup.after(super::setup));
+
+        // Gizmos for visualization
         app.add_systems(Update, draw_connections);
+
+        // Functionality
         app.add_systems(
             FixedUpdate,
             (
@@ -56,20 +63,21 @@ fn mark_satellites_try_connect(
     satellites: Query<(Entity, &Connections), (With<Satellite>, Without<TryConnect>)>,
 ) {
     let mut rng = thread_rng();
+    let uniform = Uniform::new(0.0, 1.0);
     let part_of_sats_num = satellites.iter().count() / (config.Simulation.connection_number + 1);
     for sat in satellites
         .iter()
         .filter_map(|(s, c)| {
             // filter out satellites that already saturate their connections
             if c.connections.len() < config.Simulation.connection_number
-                && rng.gen::<f32>() < 1. / (config.Simulation.connection_number + 1) as f32
+                && uniform.sample(&mut rng) < 1. / (config.Simulation.connection_number + 1) as f32
             {
                 Some(s)
             } else {
                 None
             }
         })
-        .take(part_of_sats_num.min(2000))
+        .take(part_of_sats_num.max(2000))
     {
         commands.entity(sat).insert(TryConnect);
     }
@@ -88,8 +96,11 @@ fn connect_nearest(
     >,
     mut connections: EventWriter<ConnectTwo>,
 ) {
+    // get configuration parameters
     let connection_num = config.Simulation.connection_number;
     let connection_dist = config.Simulation.connection_distance;
+
+    // get all sats which are trying to connect, and get their global positions
     let from_sats_iter = from_satellites
         .into_iter()
         // global transform to global coordinates
@@ -153,6 +164,8 @@ fn break_farthest(
     mut ev_break: EventWriter<Breaktwo>,
 ) {
     let mut rng = rand::thread_rng();
+    let uniform = Uniform::new(0.0, 1.0);
+
     for (sat, conns, trans) in &satellites {
         let cur_loc = trans.translation();
         for other_sat in conns.connections.clone() {
@@ -175,7 +188,7 @@ fn break_farthest(
 
             // randomly choose the farthest connections to break
             if conns.connections.len() == config.Simulation.connection_number
-                && rng.gen::<f32>() < 1e-4 * config.Simulation.time_speed
+                && uniform.sample(&mut rng) < 1e-4 * config.Simulation.time_speed
             {
                 let mut break_sat = None;
                 let mut max_distance = 0.0;
