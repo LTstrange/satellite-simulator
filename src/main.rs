@@ -1,7 +1,7 @@
 mod prelude {
     pub use anyhow::Result;
     pub use bevy::prelude::*;
-    pub use serde::Deserialize;
+    pub use serde::{Deserialize, Serialize};
 
     pub use super::config::*;
     pub use super::io::*;
@@ -50,11 +50,6 @@ fn setup(
         unlit: true, // 无光照
         ..Default::default()
     });
-    // let earth_material = materials.add(StandardMaterial {
-    //     base_color_texture: Some(images.add(uv_debug_texture())),
-    //     unlit: true,
-    //     ..default()
-    // });
 
     // 创建一个球体并设置其位置在原点
     commands.spawn(PbrBundle {

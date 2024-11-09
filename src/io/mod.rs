@@ -1,7 +1,5 @@
 use bevy::tasks::IoTaskPool;
 
-use serde::{Deserialize, Serialize};
-
 use crate::prelude::*;
 
 mod netcode;
