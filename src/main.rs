@@ -14,12 +14,12 @@ mod prelude {
 use prelude::*;
 
 use camera::OrbitCameraPlugin;
-use control::ControlPlugin;
+use io::ControlPlugin;
 use satellite::SatellitePlugin;
 
 mod camera;
 mod config;
-mod control;
+mod io;
 mod satellite;
 mod utils;
 
