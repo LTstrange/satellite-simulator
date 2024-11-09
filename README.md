@@ -42,6 +42,7 @@ This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a re
 - **Orbit Display**: Satellite orbits are displayed in white, with satellite positions dynamically updated over time.
 - **Link Display**: Inter-satellite links (ISL) are shown as yellow bidirectional arrows. Satellites connect to their nearest neighbors by default, with links breaking once they exceed the communication range.
 - **Configuration File**: Use the `config.toml` file to customize simulator settings.
+- **Network Interface**: Supports data retrieval through a network interface.
 
 ## Configuration File (`config.toml`)
    The config.toml file allows for configuring the simulator’s overall behavior. The following settings can be adjusted within the configuration file:
@@ -55,6 +56,43 @@ This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a re
       - **connection_distance**: Specifies the maximum distance for ISL connections.
       - **connection_number**: Defines the maximum number of ISL connections per satellite.
    Ensure that the `config.toml` is located in the same directory as the executable file.
+
+## Network Interface
+   Simulator supports data retrieval through a network interface using specified json commands.
+
+   There are common patterns for the json commands:
+   - **cmd**: The command to be executed.
+   - **params**: The parameters for the command.
+
+   And the response data is:
+   - **status**: The status of the command.
+   - **data**: The data returned by the command.
+
+   Now the simulator supports the following commands:
+   1. **GetTopology**: 
+      Retrieves the current satellite topology.
+
+      Command:
+      ```json
+      {
+         "cmd": "GetTopology"
+      }
+      ```
+
+      Response:
+      ```json
+      {
+         "status": "success",
+         "data": {
+            "<satellite_id_from>": [
+               "<satellite_id_to>",
+               ...
+            ],
+            ...
+         }
+      }
+      ```
+
 
 ## Future Work
 - **Enhanced Communication Link Modeling**: Add simulations for transmission delays and signal interference within established satellite links.
