@@ -3,3 +3,5 @@
 Recording what I want to do next, and what I will do.
 
 - cache the data, to migrate the speed difference between simulator and python code. (May not be necessary)
+- double pass connection, to keep connection stable.
+- keep the simulator running when window is minimized.
