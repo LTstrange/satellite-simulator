@@ -39,8 +39,8 @@ struct OrbitalElements {
     mean_anomaly: f32,                // 平近点角(rad)
 }
 
-impl From<SatelliteData> for OrbitalElements {
-    fn from(value: SatelliteData) -> Self {
+impl OrbitalElements {
+    fn new(value: &SatelliteData) -> Self {
         Self {
             mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
             eccentricity: value.ECCENTRICITY,
@@ -75,13 +75,14 @@ fn setup(
 
         let duration = current_time - observe_time.unwrap();
 
-        let mut orbital = OrbitalElements::from(satellite);
+        let mut orbital = OrbitalElements::new(&satellite);
         orbital.mean_anomaly += (duration.num_seconds() as f32 * orbital.mean_motion) % (2. * PI);
 
         let pos = get_position_from_orbital_elements(&orbital);
 
         commands.spawn((
             Satellite,
+            Name::new(satellite.OBJECT_ID),
             orbital,
             PbrBundle {
                 transform: Transform::from_translation(pos),
