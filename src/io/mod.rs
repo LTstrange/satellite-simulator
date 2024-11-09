@@ -22,9 +22,14 @@ impl Plugin for ControlPlugin {
     }
 }
 
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+pub enum RequestCmd {
+    GetTopology,
+}
+
 #[derive(Debug, Deserialize, Event)]
 pub struct NetRequest {
-    pub cmd: String,
+    pub cmd: RequestCmd,
     pub params: Option<serde_json::Value>,
 }
 
