@@ -43,6 +43,7 @@ async fn handle_connection(
         // 读取消息长度
         if let Err(e) = stream.read_exact(&mut length_buf).await {
             warn!("Failed to read message length: {}", e);
+            send_error_response(&mut stream, "Failed to read message length").await?;
             break;
         }
         let message_length = u32::from_be_bytes(length_buf) as usize;
@@ -51,6 +52,7 @@ async fn handle_connection(
         let mut message = vec![0u8; message_length];
         if let Err(e) = stream.read_exact(&mut message).await {
             warn!("Failed to read message: {}", e);
+            send_error_response(&mut stream, "Failed to read message").await?;
             break;
         }
 
@@ -59,7 +61,8 @@ async fn handle_connection(
             Ok(req) => req,
             Err(e) => {
                 warn!("Failed to parse request: {}", e);
-                continue;
+                send_error_response(&mut stream, "Failed to parse request").await?;
+                break;
             }
         };
 
@@ -68,22 +71,38 @@ async fn handle_connection(
 
         // Receive response from bevy event
         let response = rx_response.recv().await.unwrap();
-
-        // 序列化响应
-        let response_data = serde_json::to_vec(&response)?;
-        let response_length = response_data.len() as u32;
-
-        // 发送响应长度
-        if let Err(e) = stream.write_all(&response_length.to_be_bytes()).await {
-            warn!("Failed to send response length: {}", e);
+        if let Err(e) = send_response(&mut stream, response).await {
+            let error_message = format!("Failed to send response: {}", e);
+            warn!("Connection may disconnect: {}", error_message);
             break;
         }
+    }
 
-        // 发送响应内容
-        if let Err(e) = stream.write_all(&response_data).await {
-            warn!("Failed to send response: {}", e);
-            break;
-        }
+    Ok(())
+}
+
+async fn send_error_response(stream: &mut TcpStream, error_message: &str) -> Result<()> {
+    let response = NetResponse {
+        status: "error".to_string(),
+        data: serde_json::Value::String(error_message.to_string()),
+    };
+    send_response(stream, response).await?;
+    Ok(())
+}
+
+async fn send_response(stream: &mut TcpStream, data: NetResponse) -> Result<()> {
+    // 序列化响应
+    let response_data = serde_json::to_vec(&data)?;
+    let response_length = response_data.len() as u32;
+
+    // 发送响应长度
+    if let Err(e) = stream.write_all(&response_length.to_be_bytes()).await {
+        return Err(anyhow::anyhow!("Failed to send response length: {}", e));
+    }
+
+    // 发送响应内容
+    if let Err(e) = stream.write_all(&response_data).await {
+        return Err(anyhow::anyhow!("Failed to send response: {}", e));
     }
 
     Ok(())
