@@ -7,7 +7,7 @@ pub struct CommunicationPlugin;
 impl Plugin for CommunicationPlugin {
     fn build(&self, app: &mut App) {
         // Events
-        app.add_event::<ConnectTwo>().add_event::<Breaktwo>();
+        app.add_event::<ConnectTwo>().add_event::<DisconnectTwo>();
 
         // Setup
         app.add_systems(Startup, setup.after(super::setup));
@@ -22,8 +22,8 @@ impl Plugin for CommunicationPlugin {
                 mark_satellites_try_connect,
                 connect_nearest,
                 handle_connection,
-                break_farthest,
-                handle_connection_break,
+                disconnect_farthest,
+                handle_disconnection,
             ),
         );
     }
@@ -44,7 +44,7 @@ struct ConnectTwo {
 }
 
 #[derive(Event)]
-struct Breaktwo {
+struct DisconnectTwo {
     from: Entity,
     to: Entity,
 }
@@ -151,31 +151,10 @@ fn connect_nearest(
     }
 }
 
-/// Connect two satellites, based on Connection Events
-fn handle_connection(
-    config: Res<Config>,
-    mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
-    mut connections: EventReader<ConnectTwo>,
-) {
-    for ConnectTwo { from, to } in connections.read() {
-        // println!("Connected {} and {}", from, to);
-        let mut to_conn: Mut<'_, Connections> = satellites.get_mut(*to).unwrap().1;
-        if to_conn.connections.len() >= config.Simulation.connection_number {
-            continue;
-        }
-        to_conn.connections.push(*from);
-        assert!(to_conn.connections.len() <= config.Simulation.connection_number);
-
-        let mut from_conn = satellites.get_mut(*from).unwrap().1;
-        from_conn.connections.push(*to);
-        assert!(from_conn.connections.len() <= config.Simulation.connection_number);
-    }
-}
-
-fn break_farthest(
+fn disconnect_farthest(
     config: Res<Config>,
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
-    mut ev_break: EventWriter<Breaktwo>,
+    mut ev_break: EventWriter<DisconnectTwo>,
 ) {
     let mut rng = rand::thread_rng();
     let uniform = Uniform::new(0.0, 1.0);
@@ -194,7 +173,7 @@ fn break_farthest(
             if dis_sq
                 > config.Simulation.connection_distance * config.Simulation.connection_distance
             {
-                ev_break.send(Breaktwo {
+                ev_break.send(DisconnectTwo {
                     from: sat,
                     to: other_sat,
                 });
@@ -216,7 +195,7 @@ fn break_farthest(
                     }
                 }
                 if let Some(break_sat) = break_sat {
-                    ev_break.send(Breaktwo {
+                    ev_break.send(DisconnectTwo {
                         from: sat,
                         to: break_sat,
                     });
@@ -226,11 +205,34 @@ fn break_farthest(
     }
 }
 
-fn handle_connection_break(
+/// Handle Events
+
+/// Connect two satellites, based on Connection Events
+fn handle_connection(
+    config: Res<Config>,
     mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
-    mut connections: EventReader<Breaktwo>,
+    mut connections: EventReader<ConnectTwo>,
 ) {
-    for Breaktwo { from, to } in connections.read() {
+    for ConnectTwo { from, to } in connections.read() {
+        // println!("Connected {} and {}", from, to);
+        let mut to_conn: Mut<'_, Connections> = satellites.get_mut(*to).unwrap().1;
+        if to_conn.connections.len() >= config.Simulation.connection_number {
+            continue;
+        }
+        to_conn.connections.push(*from);
+        assert!(to_conn.connections.len() <= config.Simulation.connection_number);
+
+        let mut from_conn = satellites.get_mut(*from).unwrap().1;
+        from_conn.connections.push(*to);
+        assert!(from_conn.connections.len() <= config.Simulation.connection_number);
+    }
+}
+/// Disconnect two satellites, based on Disconnection Events
+fn handle_disconnection(
+    mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
+    mut connections: EventReader<DisconnectTwo>,
+) {
+    for DisconnectTwo { from, to } in connections.read() {
         let mut from_conn = satellites.get_mut(*from).unwrap().1;
         from_conn.connections.retain(|&sat| sat != *to);
 
