@@ -1,15 +1,34 @@
 # Satellite Simulator
 
 ## Project Overview
-This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a realistic simulation of satellite orbits around Earth, covering essential functions such as communication links, computation offloading, and energy consumption. Designed to support research in satellite communication networks, it provides an intuitive 3D visualization interface that allows users to clearly observe satellite operations and communication pathways. Future updates will enable data retrieval and command inputs through a network interface, giving users access to real-time simulation data for further research and analysis.
+This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a realistic simulation of low Earth orbit satellites, simulating essential functions such as communication links, computation offloading, and energy consumption.
+
+Designed to support research in satellite communication networks, it provides an intuitive 3D visualization that enables users to clearly observe satellite operations and communication pathways.
+
+Users can access real-time simulation data through a network interface for further research and analysis.
 
 ## Features
-- **Satellite Orbit Simulation**: Supports the import of satellite data in JSON format to simulate realistic orbital paths.
-- **Orbit Visualization**: Displays the precise orbital trajectories of satellites in an interactive view.
-- **Orbit Camera**: Enables rotation and zoom controls, allowing users to adjust their perspective.
-- **Real-Time Satellite Communication Links**: Simulates the dynamic establishment and disconnection of communication links between satellites.
+- **Massive Satellite Simulation**: Supports simulating nearly 10,000 satellites at a frequency of 64 times per second
+- **Orbital Mechanics**: Accurately simulates satellite orbits using imported JSON constellation data
+- **Orbit Visualization**: Renders precise orbital paths in an interactive view
+- **Camera Controls**: Features intuitive orbit camera with smooth rotation and zoom capabilities
+- **Dynamic Communication Links**: Models real-time inter-satellite link establishment and termination
+- **Link Display**: Yellow arrows show connections between satellites. Links break when satellites move too far apart
+- **Network Interface**: Supports data retrieval through a network interface
 
 ## Installation
+
+### Run from release:
+
+1. Download the latest release from [here](https://github.com/LTstrange/satellite-simulator/releases):
+   - Select and download the executable file compatible with your operating system
+   - Download the `config.toml` configuration file and place it in the same directory as the executable
+   - Download the `starlink.json` constellation data file and place it in the directory specified in the config file
+   - If you plan to control the simulator via Python, download the Python example code included in the release
+2. Run the executable file.
+
+
+### Build from source code:
 
 1. **Clone the Repository**
 
@@ -36,37 +55,43 @@ This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a re
 
 ## Usage
 
-- **View Controls**
-   - Windows: Hold the left mouse button and drag to rotate the view; use the mouse wheel to zoom.
-   - MacOS: Use two-finger swipe to rotate the view and pinch to zoom.
-- **Orbit Display**: Satellite orbits are displayed in white, with satellite positions dynamically updated over time.
-- **Link Display**: Inter-satellite links (ISL) are shown as yellow bidirectional arrows. Satellites connect to their nearest neighbors by default, with links breaking once they exceed the communication range.
-- **Configuration File**: Use the `config.toml` file to customize simulator settings.
-- **Network Interface**: Supports data retrieval through a network interface.
+### Camera Controls
+- **Windows**: Rotate view by dragging with left mouse button, zoom with mouse wheel
+- **MacOS**: Rotate view with two-finger swipe, zoom with pinch gesture
 
-## Configuration File (`config.toml`)
-   The config.toml file allows for configuring the simulator’s overall behavior. The following settings can be adjusted within the configuration file:
-   - **[Dataset]**: Defines satellite constellation data settings.
+### Configuration
+The simulator's behavior can be customized through the `config.toml` file, which should be **placed alongside the executable**:
+   - **[Dataset]**: Defines constellation data settings.
       - **constellation_file**：Specifies the relative path to the constellation dataset.
    - **[Display]**: Controls display-related settings.
-      - **orbit**: Enables or disables orbit display.
-      - **connection**: Enables or disables ISL (Inter-Satellite Link) display.
+      - **orbit**: Toggle orbit path display.
+      - **connection**: Toggle ISL (Inter-Satellite Link) display.
    - **[Simulation]**: Configures simulation parameters.
-      - **time_speed**：This multiplier adjusts the time step size without causing simulation lag; however, setting it too high may reduce simulation accuracy.
-      - **connection_distance**: Specifies the maximum distance for ISL connections.
-      - **connection_number**: Defines the maximum number of ISL connections per satellite.
-   Ensure that the `config.toml` is located in the same directory as the executable file.
+      - **time_speed**：This multiplier adjusts the time slice size without causing simulation lag; however, setting it too high may reduce simulation accuracy.
+      - **connection_distance**: Maximum inter-satellite link range
+      - **connection_number**: Maximum connections per satellite
 
-## Network Interface
-   Simulator supports data retrieval through a network interface using specified json commands.
+- **Network Interface**: Supports data retrieval through a network interface.
+
+### Network Interface
+The simulator exposes a JSON-based network interface for data retrieval and control:
 
    There are common patterns for the json commands:
-   - **cmd**: The command to be executed.
-   - **params**: The parameters for the command.
+   **Request Format:**
+   ```json
+   {
+      "cmd": "<command_name>",
+      "params": { /* optional parameters */ }
+   }
+   ```
 
-   And the response data is:
-   - **status**: The status of the command.
-   - **data**: The data returned by the command.
+   **Response Format:**
+   ```json
+   {
+      "status": "success|error",
+      "data": { /* command-specific response data */ }
+   }
+   ```
 
    Now the simulator supports the following commands:
    1. **GetTopology**: 
@@ -75,7 +100,8 @@ This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a re
       Command:
       ```json
       {
-         "cmd": "GetTopology"
+         "cmd": "GetTopology",
+         "params": null
       }
       ```
 
