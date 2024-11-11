@@ -1,7 +1,9 @@
-# Road Map
+# Roadmap
 
-Recording what I want to do next, and what I will do.
+Recording planned and future tasks.
 
-- cache the data, to migrate the speed difference between simulator and python code. (May not be necessary)
-- double pass connection, to keep connection stable.
-- keep the simulator running when window is minimized.
+- Cache data to mitigate speed differences between simulator and Python code. (may not be necessary)
+- Implement a kind of double-pass connection for ISL simulation.
+- Maintain simulator operation when window is minimized.
+- Enhance netcode robustness.
+- Resolve performance issues caused by gizmos.
