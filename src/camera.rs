@@ -37,16 +37,17 @@ struct OrbitCamera {
 
 fn setup(mut commands: Commands) {
     // 添加相机
-    commands
-        .spawn(Camera3dBundle::default())
-        .insert(OrbitCamera {
+    commands.spawn((
+        Camera3d::default(),
+        OrbitCamera {
             radius: EARTH_RADIUS * 5.,
             azimuthal_angle: 0.,
             polar_angle: 0.,
 
             #[cfg(target_os = "windows")]
             is_dragging: false,
-        });
+        },
+    ));
 }
 
 #[cfg(target_os = "windows")]
