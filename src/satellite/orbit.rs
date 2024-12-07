@@ -47,11 +47,7 @@ pub fn draw_ellipse_orbit(
         return;
     }
     for ellpise in &query {
-        gizmos.ellipse(
-            ellpise.location,
-            ellpise.rotation,
-            ellpise.half_size,
-            Color::srgba(1., 1., 1., 0.01),
-        );
+        let iso = Isometry3d::new(ellpise.location, ellpise.rotation);
+        gizmos.ellipse(iso, ellpise.half_size, Color::srgba(1., 1., 1., 0.01));
     }
 }

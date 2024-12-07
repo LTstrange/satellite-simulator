@@ -52,11 +52,10 @@ fn setup(
     });
 
     // 创建一个球体并设置其位置在原点
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Sphere::new(EARTH_RADIUS).mesh().uv(32, 18)),
-        material: earth_material,
-        ..Default::default()
-    });
+    commands.spawn((
+        Mesh3d(meshes.add(Sphere::new(EARTH_RADIUS).mesh().uv(32, 18))),
+        MeshMaterial3d(earth_material),
+    ));
 }
 
 fn draw_axes(mut gizmos: Gizmos) {

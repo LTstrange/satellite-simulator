@@ -29,6 +29,7 @@ pub async fn netcode(
         handle_connection(stream, tx_controls.clone(), rx_response.clone())
             .await
             .unwrap();
+        info!("Connection closed from: {}", addr);
     }
 }
 

@@ -84,12 +84,9 @@ fn setup(
             Satellite,
             Name::new(satellite.OBJECT_ID),
             orbital,
-            PbrBundle {
-                transform: Transform::from_translation(pos),
-                mesh: satellite_mesh.clone(),
-                material: satellite_material.clone(),
-                ..default()
-            },
+            Mesh3d(satellite_mesh.clone()),
+            MeshMaterial3d(satellite_material.clone()),
+            Transform::from_translation(pos),
         ));
     }
 }
