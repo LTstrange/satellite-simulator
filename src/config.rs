@@ -6,6 +6,7 @@ use crate::prelude::*;
 #[derive(Deserialize, Resource)]
 pub struct Config {
     pub Dataset: Dataset,
+    #[serde(default)]
     pub Display: Display,
     pub Simulation: Simulation,
     pub Network: Network,
@@ -16,9 +17,11 @@ pub struct Dataset {
     pub constellation_file: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct Display {
+    #[serde(default)]
     pub orbit: bool,
+    #[serde(default)]
     pub connection: bool,
 }
 
