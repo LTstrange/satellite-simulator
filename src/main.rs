@@ -12,16 +12,19 @@ mod prelude {
     pub const EARTH_RADIUS: f32 = 6371.0; // 地球半径
 }
 
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use prelude::*;
 
 use camera::OrbitCameraPlugin;
 use io::ControlPlugin;
 use satellite::SatellitePlugin;
+use ui::UserInterfacePlugin;
 
 mod camera;
 mod config;
 mod io;
 mod satellite;
+mod ui;
 mod utils;
 
 fn main() -> Result<()> {
@@ -31,7 +34,13 @@ fn main() -> Result<()> {
     App::new()
         .insert_resource(config)
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-        .add_plugins((OrbitCameraPlugin, SatellitePlugin, ControlPlugin))
+        .add_plugins((
+            OrbitCameraPlugin,
+            SatellitePlugin,
+            ControlPlugin,
+            UserInterfacePlugin,
+            FrameTimeDiagnosticsPlugin,
+        ))
         .add_systems(Startup, setup)
         .add_systems(Update, (draw_axes,))
         .run();
