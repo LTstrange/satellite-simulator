@@ -11,14 +11,11 @@ pub struct UserInterfacePlugin;
 
 impl Plugin for UserInterfacePlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(WidgetsPlugin);
         app.add_systems(Startup, setup);
         app.add_systems(
             Update,
-            (
-                fps::fps_system,
-                toggle_system,
-                refresh_conn::refresh_button_system,
-            ),
+            (fps::fps_system, refresh_conn::refresh_button_system),
         );
     }
 }
