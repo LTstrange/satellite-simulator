@@ -3,9 +3,9 @@ use crate::prelude::*;
 mod display_toggle;
 mod fps;
 mod refresh_conn;
-mod toggle;
+mod widgets;
 
-use toggle::*;
+use widgets::*;
 
 pub struct UserInterfacePlugin;
 
