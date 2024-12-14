@@ -12,5 +12,5 @@ Bug Fix:
 - Enhance netcode robustness. (May be just use bevy remote protocol is better)
 
 Perfomance:
-- Resolve performance issues caused by gizmos.
 - Cache data to mitigate speed differences between simulator and Python code. (may not be necessary due to "double-pass" connection sim mod)
+- Resolve performance issues caused by gizmos. (Partialy fixed, waiting for component gizmo)

@@ -37,6 +37,7 @@ impl Plugin for CommunicationPlugin {
 }
 
 #[derive(Component)]
+#[component(storage = "SparseSet")]
 struct TryConnect;
 
 #[derive(Component)]
@@ -234,6 +235,7 @@ fn handle_connection(
         assert!(from_conn.connections.len() <= config.Simulation.connection_number);
     }
 }
+
 /// Disconnect two satellites, based on Disconnection Events
 fn handle_disconnection(
     mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
@@ -258,11 +260,14 @@ fn draw_connections(
     if !config.Display.connection {
         return;
     }
-    for (_, connections, global_trans) in &satellites {
+    for (e, connections, global_trans) in &satellites {
         let start = global_trans.translation();
         for other_sat in &connections.connections {
+            if e > *other_sat {
+                continue;
+            }
             let end = satellites.get(*other_sat).unwrap().2.translation();
-            gizmos.arrow(
+            gizmos.line(
                 start,
                 end,
                 Srgba {
