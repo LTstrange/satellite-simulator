@@ -4,8 +4,8 @@ Recording planned and future tasks.
 
 Functionality:
 - Implement some kind of double-pass connection for ISL simulation. (and set it as the default for connection and simulation result stability)
-- Realtime mode: Cant change the time speed, sync with system time, maybe useful for accurate simulation.
-- UI: tend to use ui rather than config file.
+- Realtime mode: Cant change the time speed, sync with system time, maybe useful for realtime accurate simulation.
+- UI: tend to use ui rather than config file. (Long-term work)
 
 Bug Fix:
 - Maintain simulator operation when window is minimized.
