@@ -20,12 +20,6 @@ fn node() -> Node {
     }
 }
 
-pub fn init(mut toggles: Query<(&Toggle, &mut BackgroundColor)>) {
-    for (toggle, mut bg_color) in &mut toggles {
-        bg_color.0 = if toggle.0 { ON } else { OFF };
-    }
-}
-
 pub fn toggle_system(
     mut commands: Commands,
     mut interaction_query: Query<
@@ -40,11 +34,10 @@ pub fn toggle_system(
     >,
 ) {
     for (e, interaction, mut toggle, mut bg_color, mut border_color) in &mut interaction_query {
-        match *interaction {
+        match interaction {
             Interaction::Pressed => {
                 border_color.0 = Color::BLACK;
                 toggle.0 ^= true;
-                bg_color.0 = if toggle.0 { ON } else { OFF };
                 commands.trigger_targets(ToggleClick, e);
             }
             Interaction::Hovered => {
@@ -54,5 +47,6 @@ pub fn toggle_system(
                 border_color.0 = Color::BLACK;
             }
         }
+        bg_color.0 = if toggle.0 { ON } else { OFF };
     }
 }

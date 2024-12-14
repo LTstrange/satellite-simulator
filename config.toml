@@ -4,9 +4,9 @@ constellation_file = "./starlink.json"
 [Network]
 port = 12340
 
-# [Display]
+[Display]
 # orbit = true
-# connection = true
+connection = true
 
 [Simulation]
 time_speed = 1.0
