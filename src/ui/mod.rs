@@ -5,13 +5,11 @@ mod fps;
 mod refresh_conn;
 mod widgets;
 
-use widgets::*;
-
 pub struct UserInterfacePlugin;
 
 impl Plugin for UserInterfacePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(WidgetsPlugin);
+        app.add_plugins(widgets::WidgetsPlugin);
         app.add_systems(Startup, setup);
         app.add_systems(
             Update,

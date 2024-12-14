@@ -8,7 +8,7 @@ const ON: Color = Color::srgb(0.827, 0.827, 0.827);
 pub struct ToggleClick;
 
 #[derive(Component)]
-#[require(Button, Node(node), BackgroundColor(|| OFF), BorderRadius(|| BorderRadius::all(Val::Percent(25.))), BorderColor(|| Color::BLACK))]
+#[require(Button, Node(node), BorderRadius(|| BorderRadius::all(Val::Percent(25.))), BorderColor(|| Color::BLACK))]
 pub struct Toggle(pub bool);
 
 fn node() -> Node {
@@ -20,20 +20,26 @@ fn node() -> Node {
     }
 }
 
+pub fn init(mut toggles: Query<(&Toggle, &mut BackgroundColor)>) {
+    for (toggle, mut bg_color) in &mut toggles {
+        bg_color.0 = if toggle.0 { ON } else { OFF };
+    }
+}
+
 pub fn toggle_system(
     mut commands: Commands,
     mut interaction_query: Query<
         (
             Entity,
-            &mut Toggle,
             &Interaction,
+            &mut Toggle,
             &mut BackgroundColor,
             &mut BorderColor,
         ),
-        (Changed<Interaction>, With<Button>),
+        Changed<Interaction>,
     >,
 ) {
-    for (e, mut toggle, interaction, mut bg_color, mut border_color) in &mut interaction_query {
+    for (e, interaction, mut toggle, mut bg_color, mut border_color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 border_color.0 = Color::BLACK;

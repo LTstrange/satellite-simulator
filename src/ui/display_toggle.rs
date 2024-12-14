@@ -11,7 +11,7 @@ pub fn spawn_toggle(parent: &mut ChildBuilder, config: &Config) {
         .with_children(|parent| {
             // toggle
             parent
-                .spawn(Toggle(config.Display.orbit))
+                .spawn(widgets::Toggle(config.Display.orbit))
                 .observe(toggle_orbit);
             // text
             parent.spawn((Text::new("Show Orbit"), TextFont::from_font_size(18.0)));
@@ -27,20 +27,24 @@ pub fn spawn_toggle(parent: &mut ChildBuilder, config: &Config) {
         .with_children(|parent| {
             // toggle
             parent
-                .spawn(Toggle(config.Display.connection))
+                .spawn(widgets::Toggle(config.Display.connection))
                 .observe(toggle_connection);
             // text
             parent.spawn((Text::new("Show Connection"), TextFont::from_font_size(18.0)));
         });
 }
 
-fn toggle_orbit(trigger: Trigger<ToggleClick>, toggle: Query<&Toggle>, mut config: ResMut<Config>) {
+fn toggle_orbit(
+    trigger: Trigger<widgets::ToggleClick>,
+    toggle: Query<&widgets::Toggle>,
+    mut config: ResMut<Config>,
+) {
     config.Display.orbit = toggle.get(trigger.entity()).unwrap().0;
 }
 
 fn toggle_connection(
-    trigger: Trigger<ToggleClick>,
-    toggle: Query<&Toggle>,
+    trigger: Trigger<widgets::ToggleClick>,
+    toggle: Query<&widgets::Toggle>,
     mut config: ResMut<Config>,
 ) {
     config.Display.connection = toggle.get(trigger.entity()).unwrap().0;
