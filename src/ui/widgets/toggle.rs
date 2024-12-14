@@ -36,9 +36,9 @@ pub fn toggle_system(
     for (e, mut toggle, interaction, mut bg_color, mut border_color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                border_color.0 = BLACK.into();
+                border_color.0 = Color::BLACK;
                 toggle.0 ^= true;
-                bg_color.0 = if toggle.0 { ON } else { OFF }.into();
+                bg_color.0 = if toggle.0 { ON } else { OFF };
                 commands.trigger_targets(ToggleClick, e);
             }
             Interaction::Hovered => {
