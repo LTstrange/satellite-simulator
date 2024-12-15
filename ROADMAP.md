@@ -16,5 +16,5 @@ Perfomance:
 - Cache data to mitigate speed differences between simulator and Python code. (may not be necessary due to "double-pass" connection sim mod)
 
 UI:
-- Refresh connection button. (Preparation for double-pass connection)
+- Connection saturation rate
 - Tend to use ui rather than config file.
