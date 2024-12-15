@@ -11,10 +11,7 @@ impl Plugin for UserInterfacePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(widgets::WidgetsPlugin);
         app.add_systems(Startup, setup);
-        app.add_systems(
-            Update,
-            (fps::fps_system, refresh_conn::refresh_button_system),
-        );
+        app.add_systems(Update, fps::fps_system);
     }
 }
 
