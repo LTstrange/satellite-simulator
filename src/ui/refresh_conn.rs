@@ -13,4 +13,6 @@ pub fn spawn_refresh_button(parent: &mut ChildBuilder) {
         ));
 }
 
-fn refresh_connections(trigger: Trigger<Activate>) {}
+fn refresh_connections(_trigger: Trigger<Activate>, mut e: EventWriter<DisconnectAll>) {
+    e.send(DisconnectAll);
+}

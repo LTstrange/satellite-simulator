@@ -11,7 +11,9 @@ pub struct CommunicationPlugin;
 impl Plugin for CommunicationPlugin {
     fn build(&self, app: &mut App) {
         // Events
-        app.add_event::<ConnectTwo>().add_event::<DisconnectTwo>();
+        app.add_event::<ConnectTwo>()
+            .add_event::<DisconnectTwo>()
+            .add_event::<DisconnectAll>();
 
         // Setup
         app.add_systems(Startup, setup.after(super::setup));
@@ -29,6 +31,11 @@ impl Plugin for CommunicationPlugin {
                 disconnect_farthest,
                 handle_disconnection,
             ),
+        );
+
+        app.add_systems(
+            FixedUpdate,
+            handle_disconnect_all.after(mark_satellites_try_connect),
         );
 
         // IO
@@ -56,6 +63,9 @@ struct DisconnectTwo {
     from: Entity,
     to: Entity,
 }
+
+#[derive(Event)]
+pub struct DisconnectAll;
 
 fn setup(mut commands: Commands, satellites: Query<Entity, With<Satellite>>) {
     for satellite in &satellites {
@@ -164,8 +174,8 @@ fn disconnect_farthest(
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
     mut ev_break: EventWriter<DisconnectTwo>,
 ) {
-    let mut rng = rand::thread_rng();
-    let uniform = Uniform::new(0.0, 1.0);
+    // let mut rng = rand::thread_rng();
+    // let uniform = Uniform::new(0.0, 1.0);
 
     for (sat, conns, trans) in &satellites {
         let cur_loc = trans.translation();
@@ -188,27 +198,27 @@ fn disconnect_farthest(
             }
 
             // randomly choose the farthest connections to break
-            if conns.connections.len() == config.Simulation.connection_number
-                && uniform.sample(&mut rng) < 1e-4 * config.Simulation.time_speed
-            {
-                let mut break_sat = None;
-                let mut max_distance = 0.0;
+            // if conns.connections.len() == config.Simulation.connection_number
+            //     && uniform.sample(&mut rng) < 1e-4 * config.Simulation.time_speed
+            // {
+            //     let mut break_sat = None;
+            //     let mut max_distance = 0.0;
 
-                for other_sat in &conns.connections {
-                    let other_sat_loc = satellites.get(*other_sat).unwrap().2.translation();
-                    let dis_sq = other_sat_loc.distance_squared(cur_loc);
-                    if dis_sq > max_distance {
-                        max_distance = dis_sq;
-                        break_sat = Some(*other_sat);
-                    }
-                }
-                if let Some(break_sat) = break_sat {
-                    ev_break.send(DisconnectTwo {
-                        from: sat,
-                        to: break_sat,
-                    });
-                }
-            }
+            //     for other_sat in &conns.connections {
+            //         let other_sat_loc = satellites.get(*other_sat).unwrap().2.translation();
+            //         let dis_sq = other_sat_loc.distance_squared(cur_loc);
+            //         if dis_sq > max_distance {
+            //             max_distance = dis_sq;
+            //             break_sat = Some(*other_sat);
+            //         }
+            //     }
+            //     if let Some(break_sat) = break_sat {
+            //         ev_break.send(DisconnectTwo {
+            //             from: sat,
+            //             to: break_sat,
+            //         });
+            //     }
+            // }
         }
     }
 }
@@ -247,6 +257,20 @@ fn handle_disconnection(
 
         let mut to_conn = satellites.get_mut(*to).unwrap().1;
         to_conn.connections.retain(|&sat| sat != *from);
+    }
+}
+
+fn handle_disconnect_all(
+    mut commands: Commands,
+    mut e: EventReader<DisconnectAll>,
+    mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
+) {
+    for _ in e.read() {
+        // println!("Disconnecting all satellites");
+        for (sat, mut conns) in &mut satellites {
+            conns.connections.clear();
+            commands.entity(sat).remove::<TryConnect>();
+        }
     }
 }
 
