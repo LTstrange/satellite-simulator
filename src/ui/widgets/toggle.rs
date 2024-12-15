@@ -1,11 +1,4 @@
-use crate::prelude::*;
-use bevy::color::palettes::css::*;
-
-const OFF: Color = Color::srgb(0.15, 0.15, 0.15);
-const ON: Color = Color::srgb(0.827, 0.827, 0.827);
-
-#[derive(Event)]
-pub struct ToggleClick;
+use super::*;
 
 #[derive(Component)]
 #[require(Button, Node(node), BorderRadius(|| BorderRadius::all(Val::Percent(25.))), BorderColor(|| Color::BLACK))]
@@ -38,7 +31,7 @@ pub fn toggle_system(
             Interaction::Pressed => {
                 border_color.0 = Color::BLACK;
                 toggle.0 ^= true;
-                commands.trigger_targets(ToggleClick, e);
+                commands.trigger_targets(Activate, e);
             }
             Interaction::Hovered => {
                 border_color.0 = GOLD.into();

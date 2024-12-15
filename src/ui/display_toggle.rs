@@ -35,7 +35,7 @@ pub fn spawn_toggle(parent: &mut ChildBuilder, config: &Config) {
 }
 
 fn toggle_orbit(
-    trigger: Trigger<widgets::ToggleClick>,
+    trigger: Trigger<widgets::Activate>,
     toggle: Query<&widgets::Toggle>,
     mut config: ResMut<Config>,
 ) {
@@ -43,7 +43,7 @@ fn toggle_orbit(
 }
 
 fn toggle_connection(
-    trigger: Trigger<widgets::ToggleClick>,
+    trigger: Trigger<widgets::Activate>,
     toggle: Query<&widgets::Toggle>,
     mut config: ResMut<Config>,
 ) {
