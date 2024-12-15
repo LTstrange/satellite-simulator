@@ -9,6 +9,7 @@ Functionality:
 Bug Fix:
 - Maintain simulator operation when window is minimized.
 - Enhance netcode robustness. (May be just use bevy remote protocol is better)
+- Cant use mouse drag on macos.
 
 Perfomance:
 - Resolve performance issues caused by gizmos. (Partialy fixed, waiting for component gizmo)
