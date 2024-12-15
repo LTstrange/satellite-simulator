@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+mod conn_satur_rat;
 mod display_toggle;
 mod fps;
 mod refresh_conn;
@@ -22,7 +23,7 @@ fn setup(mut commands: Commands, config: Res<Config>) {
             margin: UiRect::all(Val::Px(10.0)),
             ..default()
         })
-        .with_children(|parent: &mut ChildBuilder<'_>| {
+        .with_children(|parent| {
             // FPS
             fps::spawn_fps_text(parent);
 
@@ -31,5 +32,8 @@ fn setup(mut commands: Commands, config: Res<Config>) {
 
             // Refresh connection button
             refresh_conn::spawn_refresh_button(parent);
+
+            // Connection Saturation Rate
+            conn_satur_rat::spawn_conn_satur_rate(parent);
         });
 }
