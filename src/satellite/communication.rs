@@ -213,7 +213,7 @@ fn disconnect_farthest(
     }
 }
 
-/// Handle Events
+// --------------- Handle Events ---------------
 
 /// Connect two satellites, based on Connection Events
 fn handle_connection(
@@ -250,7 +250,7 @@ fn handle_disconnection(
     }
 }
 
-/// GIZMOS
+// --------------- GIZMOS ---------------
 
 fn draw_connections(
     config: Res<Config>,
@@ -281,7 +281,8 @@ fn draw_connections(
     }
 }
 
-// IO
+// --------------- IO ---------------
+
 fn handle_request(
     mut request: EventReader<NetRequest>,
     mut events: EventWriter<NetResponse>,
