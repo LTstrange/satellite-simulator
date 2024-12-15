@@ -6,6 +6,8 @@ pub struct CusButton;
 
 fn node() -> Node {
     Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(100.),
         border: UiRect::all(Val::Px(2.0)),
         // margin: UiRect::all(Val::Percent(50.)),
         padding: UiRect::all(Val::Px(10.0)),
