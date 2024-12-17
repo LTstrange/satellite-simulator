@@ -6,6 +6,7 @@ mod prelude {
     pub use super::config::*;
     pub use super::io::*;
     pub use super::satellite::*;
+    pub use super::statistic::*;
     pub use super::utils::*;
 
     pub use std::f32::consts::PI;
@@ -24,6 +25,7 @@ mod camera;
 mod config;
 mod io;
 mod satellite;
+mod statistic;
 mod ui;
 mod utils;
 

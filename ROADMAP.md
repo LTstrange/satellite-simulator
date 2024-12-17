@@ -5,6 +5,7 @@ Recording planned and future tasks.
 Functionality:
 - Implement some kind of double-pass connection for ISL simulation. (and set it as the default for simulationa stability)
 - Realtime mode: Cant change the time speed, sync with system time, maybe useful for realtime accurate simulation.
+- Add statistic Plugin to track some important Data.
 
 Bug Fix:
 - Maintain simulator operation when window is minimized.
