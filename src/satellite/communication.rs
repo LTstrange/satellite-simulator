@@ -1,10 +1,6 @@
 use rand::{distributions::Distribution, distributions::Uniform, seq::SliceRandom, thread_rng};
-use serde_json::{Map, Value};
 
-use crate::{
-    io::{NetRequest, NetResponse},
-    prelude::*,
-};
+use crate::prelude::*;
 
 pub struct CommunicationPlugin;
 
@@ -37,9 +33,6 @@ impl Plugin for CommunicationPlugin {
             FixedUpdate,
             handle_disconnect_all.after(mark_satellites_try_connect),
         );
-
-        // IO
-        app.add_systems(Update, handle_request);
     }
 }
 
@@ -305,33 +298,11 @@ fn draw_connections(
     }
 }
 
-// --------------- IO ---------------
+// --------------- Statistics ---------------
 
-fn handle_request(
-    mut request: EventReader<NetRequest>,
-    mut events: EventWriter<NetResponse>,
-    satellites: Query<(&Name, &Connections), With<Satellite>>,
-) {
-    for request in request.read() {
-        if request.cmd == RequestCmd::GetTopology {
-            let mut map = Map::new();
-            for (sat, conn) in &satellites {
-                let mut conn_list = Vec::new();
-                for other_sat in &conn.connections {
-                    conn_list.push(Value::String(
-                        satellites.get(*other_sat).unwrap().0.to_string(),
-                    ));
-                }
-                map.insert(sat.to_string(), Value::Array(conn_list));
-            }
-            let response = NetResponse {
-                status: "success".to_string(),
-                data: Value::Object(map),
-            };
-            events.send(response);
-        }
-    }
-}
+struct ConnNum;
+
+fn conn_num_stats() {}
 
 #[cfg(test)]
 mod test {

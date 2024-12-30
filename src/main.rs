@@ -17,7 +17,6 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use prelude::*;
 
 use camera::OrbitCameraPlugin;
-use io::ControlPlugin;
 use satellite::SatellitePlugin;
 use ui::UserInterfacePlugin;
 
@@ -39,7 +38,6 @@ fn main() -> Result<()> {
         .add_plugins((
             OrbitCameraPlugin,
             SatellitePlugin,
-            ControlPlugin,
             UserInterfacePlugin,
             FrameTimeDiagnosticsPlugin,
         ))
