@@ -1,3 +1,1 @@
-class New():
-    def __init__(self):
-        pass
+from .orbiter import Orbiter

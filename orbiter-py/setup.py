@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='orbiter-py',
+    name='orbiter',
     version='0.1.0',
     description='A satellite simulator python connector',
     author='LTstrange',
@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         # List your project dependencies here
-        # e.g., 'numpy', 'pandas', etc.
+        "requests",
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
