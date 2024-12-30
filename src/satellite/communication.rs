@@ -298,12 +298,6 @@ fn draw_connections(
     }
 }
 
-// --------------- Statistics ---------------
-
-struct ConnNum;
-
-fn conn_num_stats() {}
-
 #[cfg(test)]
 mod test {
 
