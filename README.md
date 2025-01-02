@@ -73,7 +73,7 @@ The simulator's behavior can be customized through the `config.toml` file, which
 
 - **Network Interface**: Supports data retrieval through a network interface.
 
-### Network Interface
+### Network Interface (Deprecated, decided to switch to brp):
 The simulator exposes a JSON-based network interface for data retrieval and control:
 
    There are common patterns for the json commands:
@@ -127,4 +127,6 @@ The simulator exposes a JSON-based network interface for data retrieval and cont
 - **Control Interface**: Enable command input via a network interface to allow detailed adjustments, such as assigning computation tasks to specific satellites or configuring routing algorithms.
 
 ## Contributing
-All contributions are welcome! Please begin by forking this repository and submitting a pull request, or open an issue to start a discussion.
+Solo development is challenging!
+If you're interested in this project, please feel free to open an issue!
+If you're proficient in Python or Rust, don't hesitate to reach out to me. I'd be happy to help you get familiar with the project!
