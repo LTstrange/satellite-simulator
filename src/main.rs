@@ -1,12 +1,10 @@
 mod prelude {
     pub use anyhow::Result;
     pub use bevy::prelude::*;
-    pub use serde::{Deserialize, Serialize};
+    pub use serde::Deserialize;
 
     pub use super::config::*;
-    pub use super::io::*;
     pub use super::satellite::*;
-    pub use super::statistic::*;
     pub use super::utils::*;
 
     pub use std::f32::consts::PI;
@@ -38,6 +36,7 @@ fn main() -> Result<()> {
         .add_plugins((
             OrbitCameraPlugin,
             SatellitePlugin,
+            io::IOPlugin,
             UserInterfacePlugin,
             FrameTimeDiagnosticsPlugin,
         ))
