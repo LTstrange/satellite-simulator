@@ -7,7 +7,7 @@ pub struct EllipseOrbitData {
     half_size: Vec2,
 }
 
-pub fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<(Entity, &OrbitalElements)>) {
+pub fn setup_ellipse_orbit_data(mut commands: Commands, orbits: Query<(Entity, &Satellite)>) {
     for (entity, element) in &orbits {
         // half size of the ellipse
 

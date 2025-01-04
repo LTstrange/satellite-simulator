@@ -28,11 +28,8 @@ impl Plugin for SatellitePlugin {
     }
 }
 
-// marker type for satellite
-#[derive(Component)]
-pub struct Satellite;
 #[derive(Component, Debug)]
-struct OrbitalElements {
+pub struct Satellite {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角(rad)
@@ -41,7 +38,7 @@ struct OrbitalElements {
     mean_anomaly: f32,                // 平近点角(rad)
 }
 
-impl OrbitalElements {
+impl Satellite {
     fn new(value: &SatelliteData) -> Self {
         Self {
             mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
@@ -72,20 +69,20 @@ fn setup(
     });
 
     let current_time = Utc::now();
-    for satellite in satellites {
-        let observe_time = parse_time_from_str(&satellite.EPOCH);
+    for satellite_data in satellites {
+        let observe_time = parse_time_from_str(&satellite_data.EPOCH);
 
         let duration = current_time - observe_time.unwrap();
 
-        let mut orbital = OrbitalElements::new(&satellite);
-        orbital.mean_anomaly += (duration.num_seconds() as f32 * orbital.mean_motion) % (2. * PI);
+        let mut satellite = Satellite::new(&satellite_data);
+        satellite.mean_anomaly +=
+            (duration.num_seconds() as f32 * satellite.mean_motion) % (2. * PI);
 
-        let pos = get_position_from_orbital_elements(&orbital);
+        let pos = get_position_from_orbital_elements(&satellite);
 
         commands.spawn((
-            Satellite,
-            Name::new(satellite.OBJECT_ID),
-            orbital,
+            satellite,
+            Name::new(satellite_data.OBJECT_ID),
             Mesh3d(satellite_mesh.clone()),
             MeshMaterial3d(satellite_material.clone()),
             Transform::from_translation(pos),
