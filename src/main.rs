@@ -30,13 +30,16 @@ fn main() -> Result<()> {
     let mut config_path = std::env::current_dir()?;
     config_path.push("config.toml");
     let config = config::Config::load(&config_path)?;
+
+    let port = config.Network.port;
+
     App::new()
         .insert_resource(config)
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins((
             OrbitCameraPlugin,
             SatellitePlugin,
-            io::IOPlugin,
+            io::IOPlugin::new(port),
             UserInterfacePlugin,
             FrameTimeDiagnosticsPlugin,
         ))
