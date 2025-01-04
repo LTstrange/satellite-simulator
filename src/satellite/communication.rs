@@ -11,9 +11,6 @@ impl Plugin for CommunicationPlugin {
             .add_event::<DisconnectTwo>()
             .add_event::<DisconnectAll>();
 
-        // Setup
-        app.add_systems(Startup, setup.after(super::setup));
-
         // Gizmos for visualization
         app.add_systems(Update, draw_connections);
 
@@ -40,8 +37,8 @@ impl Plugin for CommunicationPlugin {
 #[component(storage = "SparseSet")]
 struct TryConnect;
 
-#[derive(Component)]
-struct Connections {
+#[derive(Component, Default)]
+pub struct Connections {
     connections: Vec<Entity>,
 }
 
@@ -59,14 +56,6 @@ struct DisconnectTwo {
 
 #[derive(Event)]
 pub struct DisconnectAll;
-
-fn setup(mut commands: Commands, satellites: Query<Entity, With<Satellite>>) {
-    for satellite in &satellites {
-        commands.entity(satellite).insert(Connections {
-            connections: Vec::new(),
-        });
-    }
-}
 
 fn mark_satellites_try_connect(
     mut commands: Commands,

@@ -29,6 +29,7 @@ impl Plugin for SatellitePlugin {
 }
 
 #[derive(Component, Debug)]
+#[require(Connections)]
 pub struct Satellite {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
