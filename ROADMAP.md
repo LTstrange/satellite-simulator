@@ -9,9 +9,9 @@
 - [x] ISL display.
 
 ## V0.2.0
-- [] Brp based network control.
-- [] add satellites using python.
-- [] Better UI.
+- [ ] Brp based network control.
+- [ ] add satellites using python.
+- [ ] Better UI.
 
 ## Uncategorized
 
