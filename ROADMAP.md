@@ -1,5 +1,20 @@
 # Roadmap
 
+## V0.1.0
+- [x] Satellites motion simulation.
+- [x] ISLs topology construct.
+- [x] get topology from network.
+- [x] Camera control.
+- [x] Satellite orbit display.
+- [x] ISL display.
+
+## V0.2.0
+- [] Brp based network control.
+- [] add satellites using python.
+- [] Better UI.
+
+## Uncategorized
+
 Recording planned and future tasks.
 
 Functionality:
