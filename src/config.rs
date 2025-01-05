@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[allow(non_snake_case)]
 #[derive(Deserialize, Resource)]
 pub struct Config {
-    pub Dataset: Dataset,
+    pub Dataset: Option<Dataset>,
     #[serde(default)]
     pub Display: Display,
     pub Simulation: Simulation,
