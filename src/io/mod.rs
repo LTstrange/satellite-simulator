@@ -1,6 +1,7 @@
 use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 
-use bevy::remote::{http::RemoteHttpPlugin, BrpResult, RemotePlugin};
+use bevy::remote::{error_codes, http::RemoteHttpPlugin, BrpError, BrpResult, RemotePlugin};
 use serde_json::Value;
 
 pub struct IOPlugin {
@@ -23,33 +24,46 @@ impl Plugin for IOPlugin {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct AddSatelliteParams {
+    id: String,
+    elements: [f32; 6],
+}
+
+/// A helper function used to parse a `serde_json::Value`.
+fn parse<T: for<'de> Deserialize<'de>>(value: Value) -> Result<T, BrpError> {
+    serde_json::from_value(value).map_err(|err| BrpError {
+        code: error_codes::INVALID_PARAMS,
+        message: err.to_string(),
+        data: None,
+    })
+}
+
+/// A helper function used to parse a `serde_json::Value` wrapped in an `Option`.
+fn parse_some<T: for<'de> Deserialize<'de>>(value: Option<Value>) -> Result<T, BrpError> {
+    match value {
+        Some(value) => parse(value),
+        None => Err(BrpError {
+            code: error_codes::INVALID_PARAMS,
+            message: String::from("Params not provided"),
+            data: None,
+        }),
+    }
+}
+
 /// Add a satellite.
 ///
 /// # Parameters
 /// - ID: String - The ID of the satellite.
 /// - orbitial elements: [Number, .. ] - The data of the satellite.
-fn add_satellite(param: In<Option<Value>>, mut commands: Commands) -> BrpResult<Value> {
-    // Example
-    // commands.spawn((
-    //     satellite,
-    //     Name::new(satellite_data.OBJECT_ID),
-    //     Mesh3d(satellite_mesh.clone()),
-    //     MeshMaterial3d(satellite_material.clone()),
-    //     Transform::from_translation(pos),
-    // ));
+fn add_satellite(
+    In(params): In<Option<Value>>,
+    mut event: EventWriter<SpawnSatellite>,
+) -> BrpResult<Value> {
+    let AddSatelliteParams { id, elements } = parse_some(params)?;
 
-    // What we need:
-    // - ID: String                         -- from parameter
-    // - orbitial elements: [Number, .. ]   -- from parameter
-    // - mesh: Mesh                         -- from a resource
-    // - material: StandardMaterial         -- from a resource
+    let data = Satellite::from_slice(&elements);
+    event.send(SpawnSatellite { id, data });
 
-    // commands.spawn((
-    //     Satellite {
-    //         // fill in satellite data
-    //     },
-    //     Name::new("satellite"),
-    //     // fill in satellite mesh and material
-    // ));
     BrpResult::Ok(Value::Null)
 }

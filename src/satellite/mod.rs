@@ -48,7 +48,7 @@ pub struct Satellite {
 }
 
 impl Satellite {
-    fn new(value: &SatelliteData) -> Self {
+    pub fn new(value: &SatelliteData) -> Self {
         Self {
             mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
             eccentricity: value.ECCENTRICITY,
@@ -56,6 +56,16 @@ impl Satellite {
             argument_of_periapsis: value.ARG_OF_PERICENTER * PI / 180.0, // degrees to rad
             longitude_of_ascending_node: value.RA_OF_ASC_NODE * PI / 180.0, // degrees to rad
             mean_anomaly: value.MEAN_ANOMALY * PI / 180.0, // degrees to rad
+        }
+    }
+    pub fn from_slice(data: &[f32; 6]) -> Self {
+        Self {
+            mean_motion: data[0],
+            eccentricity: data[1],
+            inclination: data[2],
+            longitude_of_ascending_node: data[3],
+            argument_of_periapsis: data[4],
+            mean_anomaly: data[5],
         }
     }
 }
@@ -68,9 +78,9 @@ struct SatelliteSpawner {
 }
 
 #[derive(Event)]
-struct SpawnSatellite {
-    id: String,
-    data: Satellite,
+pub struct SpawnSatellite {
+    pub id: String,
+    pub data: Satellite,
 }
 
 /// Read and Setup satellite data and add them to the scene.
