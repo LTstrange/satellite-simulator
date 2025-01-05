@@ -2,19 +2,24 @@ import requests
 
 
 class Orbiter:
-    def __init__(self, host='localhost', port=15702):
+    def __init__(self, host='localhost', port=12340):
         self.host = host
         self.port = port
         self.connection = None
 
     def __enter__(self):
+        self.id = 0
         return self
+
+    def __get_id(self):
+        self.id += 1
+        return self.id
 
     def add_satellite(self, name):
         data = {
             "jsonrpc": "2.0",
             "method": "bevy/add_satellite",
-            "id": 1,
+            "id": self.__get_id(),
             "params": {
                 "name": name
             }
@@ -26,7 +31,7 @@ class Orbiter:
         data = {
             "jsonrpc": "2.0",
             "method": "bevy/query",
-            "id": 1,
+            "id": self.__get_id(),
             "params": {
                 "data": {
                     "components": ["bevy_transform::components::transform::Transform"],
