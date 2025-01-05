@@ -51,5 +51,5 @@ fn add_satellite(param: In<Option<Value>>, mut commands: Commands) -> BrpResult<
     //     Name::new("satellite"),
     //     // fill in satellite mesh and material
     // ));
-    todo!()
+    BrpResult::Ok(Value::Null)
 }
