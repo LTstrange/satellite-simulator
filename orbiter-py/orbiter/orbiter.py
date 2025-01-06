@@ -1,5 +1,6 @@
+from typing import List
 import requests
-from dataclasses import dataclass
+from copy import deepcopy
 
 standard_gravitational_parameter = 3.986004418e5  # km^3/s^2
 
@@ -10,7 +11,7 @@ class Satellite:
         self.elements = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
     def set_apogee_perigee(self, apogee: float, perigee: float):
-        assert (apogee > perigee)
+        assert (apogee >= perigee)
         e = (apogee - perigee) / (apogee + perigee)
         mean_motion = (standard_gravitational_parameter /
                        ((apogee + perigee)/2) ** 3) ** 0.5
@@ -38,6 +39,9 @@ class Satellite:
     def set_mean_anomaly(self, mean_anomaly: float):
         self.elements[5] = mean_anomaly
 
+    def build(self):
+        return deepcopy(self)
+
 
 class Orbiter:
     def __init__(self, host='localhost', port=12340):
@@ -60,6 +64,22 @@ class Orbiter:
             "params": {
                 "id": satellite.id,
                 "elements": satellite.elements
+            }
+        }
+        print(self.__send(data))
+
+    def add_satellites(self, satellites: List[Satellite]):
+        data = {
+            "jsonrpc": "2.0",
+            "method": "add_satellites",
+            "id": self.__get_id(),
+            "params": {
+                "satellites": [
+                    {
+                        "id": s.id,
+                        "elements": s.elements
+                    } for s in satellites
+                ]
             }
         }
         print(self.__send(data))

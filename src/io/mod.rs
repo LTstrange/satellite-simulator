@@ -18,16 +18,12 @@ impl Plugin for IOPlugin {
     fn build(&self, app: &mut App) {
         let remote_http_plugin = RemoteHttpPlugin::default().with_port(self.port);
 
-        let remote_plugin = RemotePlugin::default().with_method("add_satellite", add_satellite);
+        let remote_plugin = RemotePlugin::default()
+            .with_method("add_satellite", add_satellite)
+            .with_method("add_satellites", add_satellites);
 
         app.add_plugins((remote_plugin, remote_http_plugin));
     }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct AddSatelliteParams {
-    id: String,
-    elements: [f32; 6],
 }
 
 /// A helper function used to parse a `serde_json::Value`.
@@ -51,6 +47,12 @@ fn parse_some<T: for<'de> Deserialize<'de>>(value: Option<Value>) -> Result<T, B
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct AddSatelliteParams {
+    id: String,
+    elements: [f32; 6],
+}
+
 /// Add a satellite.
 ///
 /// # Parameters
@@ -58,7 +60,7 @@ fn parse_some<T: for<'de> Deserialize<'de>>(value: Option<Value>) -> Result<T, B
 /// - orbitial elements: [Number, .. ] - The data of the satellite.
 fn add_satellite(
     In(params): In<Option<Value>>,
-    mut event: EventWriter<SpawnSatellite>,
+    mut event: EventWriter<SpawnSatellites>,
 ) -> BrpResult<Value> {
     let AddSatelliteParams { id, elements } = parse_some(params)?;
 
@@ -67,7 +69,39 @@ fn add_satellite(
         message: err,
         data: None,
     })?;
-    event.send(SpawnSatellite { id, data });
+    event.send(SpawnSatellites {
+        satellites: vec![(id, data)],
+    });
 
+    BrpResult::Ok(Value::Null)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct AddSatellitesParams {
+    satellites: Vec<AddSatelliteParams>,
+}
+
+/// Add multiple satellites.
+///
+/// # Parameters
+/// - satellites: [ { id: String, elements: [Number, .. ] }, .. ] - The data of the satellites.
+fn add_satellites(
+    In(params): In<Option<Value>>,
+    mut event: EventWriter<SpawnSatellites>,
+) -> BrpResult<Value> {
+    let AddSatellitesParams { satellites } = parse_some(params)?;
+
+    let satellites = satellites
+        .iter()
+        .map(|AddSatelliteParams { id, elements }| {
+            let satellite = Satellite::from_slice(elements).map_err(|err| BrpError {
+                code: error_codes::INVALID_PARAMS,
+                message: err,
+                data: None,
+            })?;
+            Ok((id.clone(), satellite))
+        })
+        .collect::<BrpResult<Vec<(String, Satellite)>>>()?;
+    event.send(SpawnSatellites { satellites });
     BrpResult::Ok(Value::Null)
 }

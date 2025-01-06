@@ -22,7 +22,7 @@ impl Plugin for SatellitePlugin {
 
         app.init_resource::<SatelliteSpawner>();
 
-        app.add_event::<SpawnSatellite>();
+        app.add_event::<SpawnSatellites>();
 
         app.add_systems(Startup, setup)
             .add_systems(
@@ -70,7 +70,7 @@ impl Satellite {
             argument_of_periapsis: data[4],
             mean_anomaly: data[5],
         };
-        if sate.eccentricity <= 0.0 || sate.eccentricity >= 1.0 {
+        if sate.eccentricity < 0.0 || sate.eccentricity >= 1.0 {
             return Err("Invalid eccentricity".to_string());
         }
 
@@ -86,9 +86,8 @@ struct SatelliteSpawner {
 }
 
 #[derive(Event)]
-pub struct SpawnSatellite {
-    pub id: String,
-    pub data: Satellite,
+pub struct SpawnSatellites {
+    pub satellites: Vec<(String, Satellite)>,
 }
 
 /// Read and Setup satellite data and add them to the scene.
@@ -130,12 +129,12 @@ fn setup(
 }
 
 fn receive_spawn_event(
-    mut event: EventReader<SpawnSatellite>,
+    mut event: EventReader<SpawnSatellites>,
     mut satellite_spawner: ResMut<SatelliteSpawner>,
 ) {
-    for SpawnSatellite { id, data } in event.read() {
-        println!("Receive spawn event: {}", id);
-        satellite_spawner.data.push((id.clone(), data.clone()));
+    for SpawnSatellites { satellites } in event.read() {
+        println!("Receive spawn event: {}", satellites.len());
+        satellite_spawner.data.extend(satellites.clone());
     }
 }
 
