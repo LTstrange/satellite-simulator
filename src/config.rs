@@ -39,7 +39,8 @@ pub struct Network {
 
 impl Config {
     pub fn load(file_path: &Path) -> Result<Self> {
-        let mut file = std::fs::File::open(file_path)?;
+        let mut file = std::fs::File::open(file_path)
+            .map_err(|_| anyhow::anyhow!("Config file not found."))?;
         let mut content = String::new();
         file.read_to_string(&mut content)?;
 
