@@ -15,7 +15,7 @@ pub fn get_ellipse_orbit_data(satellite: &Satellite) -> EllipseOrbitData {
     let semi_major_axis = FACTOR * n;
     // b = a * sqrt(1 - e^2)
     let semi_minor_axis = semi_major_axis * (1.0 - satellite.eccentricity.powi(2)).sqrt();
-    let half_size = Vec2::new(semi_minor_axis, semi_major_axis);
+    let half_size = Vec2::new(semi_major_axis, semi_minor_axis);
 
     let rotation = get_rotated_quat(
         satellite.inclination,
