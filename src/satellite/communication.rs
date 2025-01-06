@@ -65,13 +65,13 @@ fn mark_satellites_try_connect(
     let mut rng = thread_rng();
 
     // debug
-    let empty_sats = satellites
-        .iter()
-        .filter(|(_, c)| c.connections.len() == 0)
-        .collect::<Vec<_>>();
-    if empty_sats.len() != 0 {
-        info!("Empty satellites: {:?}", empty_sats.len());
-    }
+    // let empty_sats = satellites
+    //     .iter()
+    //     .filter(|(_, c)| c.connections.len() == 0)
+    //     .collect::<Vec<_>>();
+    // if empty_sats.len() != 0 {
+    //     info!("Empty satellites: {:?}", empty_sats.len());
+    // }
 
     // filter out satellites that already saturate their connections
     let mut unfull_satellites = satellites

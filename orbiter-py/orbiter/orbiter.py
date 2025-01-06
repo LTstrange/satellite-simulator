@@ -15,27 +15,14 @@ class Orbiter:
         self.id += 1
         return self.id
 
-    def add_satellite(self, name):
+    def add_satellite(self, name, mean_motion, eccentricity, inclination, longitude_of_ascending_node, argument_of_periapsis, mean_anomaly):
         data = {
             "jsonrpc": "2.0",
-            "method": "bevy/add_satellite",
+            "method": "add_satellite",
             "id": self.__get_id(),
             "params": {
-                "name": name
-            }
-        }
-        print(self.__send(data))
-
-    def test(self):
-        print('test')
-        data = {
-            "jsonrpc": "2.0",
-            "method": "bevy/query",
-            "id": self.__get_id(),
-            "params": {
-                "data": {
-                    "components": ["bevy_transform::components::transform::Transform"],
-                },
+                "id": name,
+                "elements": [mean_motion, eccentricity, inclination, longitude_of_ascending_node, argument_of_periapsis, mean_anomaly]
             }
         }
         print(self.__send(data))

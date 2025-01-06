@@ -44,6 +44,7 @@ pub fn draw_ellipse_orbit(
     if !config.Display.orbit {
         return;
     }
+
     for ellpise in &query {
         let iso = Isometry3d::new(ellpise.location, ellpise.rotation);
         gizmos.ellipse(iso, ellpise.half_size, Color::srgba(1., 1., 1., 0.01));
