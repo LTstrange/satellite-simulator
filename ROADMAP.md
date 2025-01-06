@@ -11,10 +11,11 @@
 ## V0.2.0
 - [x] Brp based network control.
 - [x] add satellites using python.
-- [ ] add ISLs using python.
+- [ ] set ISLs using python.
 - [ ] static ISL and dynamic ISL for xGrid constellation.
 - [ ] fetch ISLs using python.
 - [ ] Better UI.
+- [ ] Better Documentation. (mdbook)
 
 ## Uncategorized
 
