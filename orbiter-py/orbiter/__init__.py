@@ -1,1 +1,1 @@
-from .orbiter import Orbiter
+from .orbiter import Orbiter, Satellite
