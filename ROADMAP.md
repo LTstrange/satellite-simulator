@@ -24,12 +24,10 @@ Functionality:
 - Add statistic Plugin to track some important Data.
 
 Bug Fix:
-- Maintain simulator operation when window is minimized.
-- Enhance netcode robustness. (May be just use bevy remote protocol is better)
+- Maintain simulation when window is minimized.
 
 Perfomance:
 - Resolve performance issues caused by gizmos. (Partialy fixed, waiting for (component_gizmo/GizmoAsset))
-- Cache data to mitigate speed differences between simulator and Python code. (may not be necessary due to "double-pass" connection sim mod)
 
 UI:
 - Tend to use ui rather than config file.
