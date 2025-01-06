@@ -62,7 +62,11 @@ fn add_satellite(
 ) -> BrpResult<Value> {
     let AddSatelliteParams { id, elements } = parse_some(params)?;
 
-    let data = Satellite::from_slice(&elements);
+    let data = Satellite::from_slice(&elements).map_err(|err| BrpError {
+        code: error_codes::INVALID_PARAMS,
+        message: err,
+        data: None,
+    })?;
     event.send(SpawnSatellite { id, data });
 
     BrpResult::Ok(Value::Null)

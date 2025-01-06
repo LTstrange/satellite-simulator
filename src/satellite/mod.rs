@@ -61,15 +61,20 @@ impl Satellite {
             mean_anomaly: value.MEAN_ANOMALY * PI / 180.0, // degrees to rad
         }
     }
-    pub fn from_slice(data: &[f32; 6]) -> Self {
-        Self {
+    pub fn from_slice(data: &[f32; 6]) -> Result<Self, String> {
+        let sate = Self {
             mean_motion: data[0],
             eccentricity: data[1],
             inclination: data[2],
             longitude_of_ascending_node: data[3],
             argument_of_periapsis: data[4],
             mean_anomaly: data[5],
+        };
+        if sate.eccentricity <= 0.0 || sate.eccentricity >= 1.0 {
+            return Err("Invalid eccentricity".to_string());
         }
+
+        Ok(sate)
     }
 }
 
