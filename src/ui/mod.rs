@@ -31,9 +31,9 @@ fn setup(mut commands: Commands, config: Res<Config>) {
             display_toggle::spawn_toggle(parent, &config);
 
             // Refresh connection button
-            refresh_conn::spawn_refresh_button(parent);
+            // refresh_conn::spawn_refresh_button(parent);
 
             // Connection Saturation Rate
-            conn_satur_rat::spawn_conn_satur_rate(parent);
+            // conn_satur_rat::spawn_conn_satur_rate(parent);
         });
 }

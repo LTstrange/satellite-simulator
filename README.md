@@ -1,5 +1,8 @@
 # Satellite Simulator
 
+![preview.png](./sat_sim.png)
+> Starlink satellites, connecting nearest.
+
 ## Project Overview
 This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a realistic simulation of low Earth orbit satellites, simulating essential functions such as communication links, computation offloading, and energy consumption.
 

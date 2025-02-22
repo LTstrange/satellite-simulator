@@ -1,11 +1,11 @@
-# [Dataset]
-# constellation_file = "./starlink.json"
+[Dataset]
+constellation_file = "./starlink.json"
 
 [Network]
 port = 12340
 
 [Display]
-# orbit = true
+orbit = true
 connection = true
 
 [Simulation]
