@@ -4,19 +4,19 @@
 > Starlink satellites, connecting nearest.
 
 ## Project Overview
-This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a realistic simulation of low Earth orbit satellites, simulating essential functions such as communication links, computation offloading, and energy consumption.
+This simulator, built on the [Bevy engine](https://bevyengine.org/), offers a realistic simulation of low Earth orbit(LEO) satellites, simulating essential functions such as communication links, computation offloading, and energy consumption.
 
 Designed to support research in satellite communication networks, it provides an intuitive 3D visualization that enables users to clearly observe satellite operations and communication pathways.
 
 Users can access real-time simulation data through a network interface for further research and analysis.
 
 ## Features
-- **Massive Satellite Simulation**: Supports simulating nearly 10,000 satellites at a frequency of 64 times per second
+- **Massive Satellite Simulation**: Supports simulating over 10,000 satellites at a frequency of 64 times per second
 - **Orbital Mechanics**: Accurately simulates satellite orbits using imported JSON constellation data
 - **Orbit Visualization**: Renders precise orbital paths in an interactive view
 - **Camera Controls**: Features intuitive orbit camera with smooth rotation and zoom capabilities
-- **Dynamic Communication Links**: Models real-time inter-satellite link establishment and termination
-- **Link Display**: Yellow arrows show connections between satellites. Links break when satellites move too far apart
+- **Dynamic Communication Links**: Models real-time inter-satellite link (ISL) establishment and termination
+- **Link Display**: Yellow lines show connections between satellites. Links break when satellites move too far apart
 - **Network Interface**: Supports data retrieval through a network interface
 
 ## Installation
@@ -65,18 +65,18 @@ Users can access real-time simulation data through a network interface for furth
 ### Configuration
 The simulator's behavior can be customized through the `config.toml` file, which should be **placed alongside the executable**:
    - **[Dataset]**: Defines constellation data settings.
-      - **constellation_file**：Specifies the relative path to the constellation dataset.
+      - **constellation_file**: Specifies the relative path to the constellation dataset.
+   - **[Network]**: Define network related attributes.
+      - **port**: network control port
    - **[Display]**: Controls display-related settings.
       - **orbit**: Toggle orbit path display.
       - **connection**: Toggle ISL (Inter-Satellite Link) display.
    - **[Simulation]**: Configures simulation parameters.
-      - **time_speed**：This multiplier adjusts the time slice size without causing simulation lag; however, setting it too high may reduce simulation accuracy.
+      - **time_speed**: This multiplier adjusts the time slice size without causing simulation lag; however, setting it too high may reduce simulation accuracy.
       - **connection_distance**: Maximum inter-satellite link range
       - **connection_number**: Maximum connections per satellite
 
-- **Network Interface**: Supports data retrieval through a network interface.
-
-### Network Interface (Deprecated, decided to switch to brp):
+### Network Interface (Deprecated, decided to switch to brp-base, see [orbiter-py](./orbiter-py/README.md)):
 The simulator exposes a JSON-based network interface for data retrieval and control:
 
    There are common patterns for the json commands:
@@ -127,7 +127,8 @@ The simulator exposes a JSON-based network interface for data retrieval and cont
 - **Enhanced Communication Link Modeling**: Add simulations for transmission delays and signal interference within established satellite links.
 - **Computation Offloading Simulation**: Model the computational resources available on satellites.
 - **Energy Simulation**: Implement energy modeling to account for power consumption due to transmissions and computations, along with solar energy recharging for satellites.
-- **Control Interface**: Enable command input via a network interface to allow detailed adjustments, such as assigning computation tasks to specific satellites or configuring routing algorithms.
+- **More Network Control**: Enable command input via a network interface to allow detailed adjustments, such as assigning computation tasks to specific satellites or configuring routing algorithms.
+- For more information, please check [ROADMAP.md](./ROADMAP.md).
 
 ## Contributing
 Solo development is challenging!
