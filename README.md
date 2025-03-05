@@ -31,7 +31,7 @@ Users can access real-time simulation data through a network interface for furth
 2. Run the executable file.
 
 
-### Build from source code:
+### Build from source code(recommended):
 
 1. **Clone the Repository**
 
