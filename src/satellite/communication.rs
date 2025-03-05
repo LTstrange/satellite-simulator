@@ -1,4 +1,4 @@
-use rand::{distributions::Distribution, distributions::Uniform, seq::SliceRandom, thread_rng};
+use rand::{distr::Distribution, distr::Uniform, rng, seq::SliceRandom};
 
 use crate::prelude::*;
 
@@ -62,7 +62,7 @@ fn mark_satellites_try_connect(
     config: Res<Config>,
     satellites: Query<(Entity, &Connections), (With<Satellite>, Without<TryConnect>)>,
 ) {
-    let mut rng = thread_rng();
+    let mut rng = rng();
 
     // debug
     // let empty_sats = satellites
