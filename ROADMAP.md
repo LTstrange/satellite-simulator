@@ -30,6 +30,7 @@ Bug Fix:
 - Maintain simulation when window is minimized.
 
 Perfomance:
+- Separate orbit param and satellite param, enabling calc orbit and sate movement separately.
 - Resolve performance issues caused by gizmos. (Partialy fixed, waiting for (component_gizmo/GizmoAsset))
 
 UI:
