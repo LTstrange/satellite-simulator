@@ -9,6 +9,9 @@ classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    'Operating System :: OS Independent',
+    'Development Status :: 3 - Alpha',
+    'Intended Audience :: Science/Research',
 ]
 dynamic = ["version"]
 [tool.maturin]
