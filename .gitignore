@@ -3,3 +3,5 @@
 .idea
 *.egg-info
 .venv
+
+.vscode/
