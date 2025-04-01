@@ -76,7 +76,7 @@ The simulator's behavior can be customized through the `config.toml` file, which
       - **connection_distance**: Maximum inter-satellite link range
       - **connection_number**: Maximum connections per satellite
 
-### Network Interface (Deprecated, decided to switch to brp-base, see [orbiter-py](./orbiter-py/README.md)):
+### Network Interface (Deprecated, decided to switch to brp-base, see [orbiter_py](./orbiter_py/README.md)):
 The simulator exposes a JSON-based network interface for data retrieval and control:
 
    There are common patterns for the json commands:
