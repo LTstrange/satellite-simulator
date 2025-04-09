@@ -1,9 +1,7 @@
 use crate::prelude::*;
 
-mod conn_satur_rat;
 mod display_toggle;
 mod fps;
-mod refresh_conn;
 mod widgets;
 
 pub struct UserInterfacePlugin;

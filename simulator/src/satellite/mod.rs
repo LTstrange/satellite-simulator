@@ -10,8 +10,6 @@ use communication::*;
 use motion::*;
 use orbit::*;
 
-pub use communication::DisconnectAll;
-
 const FACTOR: f32 = 73.594_6; // u^(1/3)
 
 pub struct SatellitePlugin;
