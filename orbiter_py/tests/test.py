@@ -22,5 +22,5 @@ class TestOrbiter(unittest.TestCase):
             orb.add_satellites(satellites)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

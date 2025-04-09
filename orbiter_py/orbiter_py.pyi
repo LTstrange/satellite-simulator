@@ -1,5 +1,10 @@
 class SatSimManager:
-    def __init__(self, host: str, port: int):
+    """
+    Manage connections to the Satellite Simulator.
+    provide constellation building api.
+
+    """
+    def __new__(host: str, port: int):
         """
         Connect to the Satellite Simulator with the given host and port.
 
@@ -15,15 +20,23 @@ class SatSimManager:
         """
         ...
 
-    def create_orbit(self, apogee_km: int, perigee_km: int,
-                     inclination_rad: float):
+    def create_orbit(
+        self,
+        apogee: float,
+        perigee: float,
+        inclination: float,
+        longitude_of_ascending_node: float,
+        argument_of_periapsis: float,
+        mean_anomaly: float,
+    ):
         """
-        Create a new orbit with the given apogee and perigee distances,
-        inclination in radians, and add it to the SatSim simulation.
+        Create a new orbit.
 
         Args:
-            apogee_km (int): The apogee distance in kilometers.
-            perigee_km (int): The perigee distance in kilometers.
-            inclination_rad (float): The inclination in radians.
+            apogee: The apogee distance in kilometers.
+            perigee : The perigee distance in kilometers.
+            inclination: The inclination in radians.
+            longitude_of_ascending_node: The longitude of ascending node in radians.
+            argument_of_periapsis: The argument of periapsis in radians.
         """
         ...
