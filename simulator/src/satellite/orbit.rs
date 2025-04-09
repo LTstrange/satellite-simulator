@@ -7,7 +7,7 @@ pub struct EllipseOrbitData {
     half_size: Vec2,
 }
 
-pub fn get_ellipse_orbit_data(satellite: &Satellite) -> EllipseOrbitData {
+pub fn get_ellipse_orbit_data(satellite: &OrbitalElements) -> EllipseOrbitData {
     // half size of the ellipse
 
     let n = satellite.mean_motion.powf(-2. / 3.);

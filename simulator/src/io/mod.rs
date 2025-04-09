@@ -64,7 +64,7 @@ fn add_satellite(
 ) -> BrpResult<Value> {
     let AddSatelliteParams { id, elements } = parse_some(params)?;
 
-    let data = Satellite::from_slice(&elements).map_err(|err| BrpError {
+    let data = OrbitalElements::from_slice(&elements).map_err(|err| BrpError {
         code: error_codes::INVALID_PARAMS,
         message: err,
         data: None,
@@ -94,14 +94,14 @@ fn add_satellites(
     let satellites = satellites
         .iter()
         .map(|AddSatelliteParams { id, elements }| {
-            let satellite = Satellite::from_slice(elements).map_err(|err| BrpError {
+            let satellite = OrbitalElements::from_slice(elements).map_err(|err| BrpError {
                 code: error_codes::INVALID_PARAMS,
                 message: err,
                 data: None,
             })?;
             Ok((id.clone(), satellite))
         })
-        .collect::<BrpResult<Vec<(String, Satellite)>>>()?;
+        .collect::<BrpResult<Vec<(String, OrbitalElements)>>>()?;
     event.send(SpawnSatellites { satellites });
     BrpResult::Ok(Value::Null)
 }

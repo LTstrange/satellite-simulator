@@ -39,7 +39,7 @@ impl Plugin for SatellitePlugin {
 
 #[derive(Component, Debug, Clone)]
 #[require(Connections)]
-pub struct Satellite {
+pub struct OrbitalElements {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角(rad)
@@ -48,7 +48,7 @@ pub struct Satellite {
     mean_anomaly: f32,                // 平近点角(rad)
 }
 
-impl Satellite {
+impl OrbitalElements {
     pub fn new(value: &SatelliteData) -> Self {
         Self {
             mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
@@ -80,15 +80,15 @@ impl Satellite {
 struct SatelliteSpawner {
     mesh: Handle<Mesh>,
     material: Handle<StandardMaterial>,
-    data: Vec<(String, Satellite)>,
+    unspawned_sats: Vec<(String, OrbitalElements)>,
 }
 
 #[derive(Event)]
 pub struct SpawnSatellites {
-    pub satellites: Vec<(String, Satellite)>,
+    pub satellites: Vec<(String, OrbitalElements)>,
 }
 
-/// Read and Setup satellite data and add them to the scene.
+/// Read satellite data and Setup Satellite Spawner.
 fn setup(
     mut commands: Commands,
     config: Res<Config>,
@@ -112,7 +112,7 @@ fn setup(
         data.extend(satellites_data.into_iter().map(|satellite_data| {
             let observe_time = parse_time_from_str(&satellite_data.EPOCH);
             let duration = current_time - observe_time.unwrap();
-            let mut satellite = Satellite::new(&satellite_data);
+            let mut satellite = OrbitalElements::new(&satellite_data);
             satellite.mean_anomaly +=
                 (duration.num_seconds() as f32 * satellite.mean_motion) % (2. * PI);
             (satellite_data.OBJECT_ID, satellite)
@@ -122,7 +122,7 @@ fn setup(
     commands.insert_resource(SatelliteSpawner {
         mesh: satellite_mesh,
         material: satellite_material,
-        data,
+        unspawned_sats: data,
     });
 }
 
@@ -132,14 +132,14 @@ fn receive_spawn_event(
 ) {
     for SpawnSatellites { satellites } in event.read() {
         println!("Receive spawn event: {}", satellites.len());
-        satellite_spawner.data.extend(satellites.clone());
+        satellite_spawner.unspawned_sats.extend(satellites.clone());
     }
 }
 
 fn spawn_satellites(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
     let mesh = satellite_spawner.mesh.clone();
     let material = satellite_spawner.material.clone();
-    for (satellite_id, satellite) in satellite_spawner.data.drain(..) {
+    for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
         let pos = get_position_from_orbital_elements(&satellite);
         let orbit = get_ellipse_orbit_data(&satellite);
 

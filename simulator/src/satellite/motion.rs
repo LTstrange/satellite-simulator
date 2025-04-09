@@ -2,7 +2,7 @@ use super::*;
 
 pub fn update_mean_anomaly(
     config: Res<Config>,
-    mut satellites: Query<&mut Satellite, With<Satellite>>,
+    mut satellites: Query<&mut OrbitalElements, With<OrbitalElements>>,
     time: Res<Time<Fixed>>,
 ) {
     for mut element in &mut satellites {
@@ -12,13 +12,13 @@ pub fn update_mean_anomaly(
     }
 }
 
-pub fn update_satellite_position(mut satellites: Query<(&mut Transform, &Satellite)>) {
+pub fn update_satellite_position(mut satellites: Query<(&mut Transform, &OrbitalElements)>) {
     for (mut transform, orbital) in satellites.iter_mut() {
         transform.translation = get_position_from_orbital_elements(orbital);
     }
 }
 
-pub fn get_position_from_orbital_elements(orbital: &Satellite) -> Vec3 {
+pub fn get_position_from_orbital_elements(orbital: &OrbitalElements) -> Vec3 {
     let true_anomaly = anomaly_mean_to_true(orbital.mean_anomaly, orbital.eccentricity).unwrap();
     let n = orbital.mean_motion.powf(-2. / 3.);
     let semi_major_axis = FACTOR * n;
