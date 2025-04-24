@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use brp_packages::AddSatellite;
 use serde::{Deserialize, Serialize};
 
 use bevy::remote::{error_codes, http::RemoteHttpPlugin, BrpError, BrpResult, RemotePlugin};
@@ -62,15 +63,15 @@ fn add_satellite(
     In(params): In<Option<Value>>,
     mut event: EventWriter<SpawnSatellites>,
 ) -> BrpResult<Value> {
-    let AddSatelliteParams { id, elements } = parse_some(params)?;
+    let satellite: AddSatellite = parse_some(params)?;
 
-    let data = OrbitalElements::from_slice(&elements).map_err(|err| BrpError {
+    let data = OrbitalElements::from_slice(&satellite.as_slice()).map_err(|err| BrpError {
         code: error_codes::INVALID_PARAMS,
         message: err,
         data: None,
     })?;
     event.send(SpawnSatellites {
-        satellites: vec![(id, data)],
+        satellites: vec![("id".to_string(), data)],
     });
 
     BrpResult::Ok(Value::Null)

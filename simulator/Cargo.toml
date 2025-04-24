@@ -15,5 +15,7 @@ rand = "0.9.*"
 async-channel = "2.3.1"
 async-net = "2.0.0"
 
+brp_packages = { path = "../brp_packages"}
+
 [lints.clippy]
 type_complexity = "allow"
