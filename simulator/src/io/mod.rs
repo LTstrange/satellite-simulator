@@ -70,7 +70,7 @@ fn add_satellite(
         message: err,
         data: None,
     })?;
-    event.send(SpawnSatellites {
+    event.write(SpawnSatellites {
         satellites: vec![("id".to_string(), data)],
     });
 
@@ -103,6 +103,6 @@ fn add_satellites(
             Ok((id.clone(), satellite))
         })
         .collect::<BrpResult<Vec<(String, OrbitalElements)>>>()?;
-    event.send(SpawnSatellites { satellites });
+    event.write(SpawnSatellites { satellites });
     BrpResult::Ok(Value::Null)
 }

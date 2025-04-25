@@ -141,7 +141,7 @@ fn connect_nearest(
 
         let count = connection_num - cur_conn.connections.len();
         for (&other_sat, _, _) in &other_satellites[..count.min(other_satellites.len())] {
-            connections.send(ConnectTwo {
+            connections.write(ConnectTwo {
                 from: cur_sat,
                 to: other_sat,
             });
@@ -156,9 +156,7 @@ fn disconnect_farthest(
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<OrbitalElements>>,
     mut ev_break: EventWriter<DisconnectTwo>,
 ) {
-    // let mut rng = rand::thread_rng();
-    // let uniform = Uniform::new(0.0, 1.0);
-
+    let mut batch = vec![];
     for (sat, conns, trans) in &satellites {
         let cur_loc = trans.translation();
         for other_sat in conns.connections.clone() {
@@ -173,36 +171,19 @@ fn disconnect_farthest(
             if dis_sq
                 > config.Simulation.connection_distance * config.Simulation.connection_distance
             {
-                ev_break.send(DisconnectTwo {
+                // ev_break.write(DisconnectTwo {
+                //     from: sat,
+                //     to: other_sat,
+                // });
+                batch.push(DisconnectTwo {
                     from: sat,
                     to: other_sat,
                 });
             }
-
-            // randomly choose the farthest connections to break
-            // if conns.connections.len() == config.Simulation.connection_number
-            //     && uniform.sample(&mut rng) < 1e-4 * config.Simulation.time_speed
-            // {
-            //     let mut break_sat = None;
-            //     let mut max_distance = 0.0;
-
-            //     for other_sat in &conns.connections {
-            //         let other_sat_loc = satellites.get(*other_sat).unwrap().2.translation();
-            //         let dis_sq = other_sat_loc.distance_squared(cur_loc);
-            //         if dis_sq > max_distance {
-            //             max_distance = dis_sq;
-            //             break_sat = Some(*other_sat);
-            //         }
-            //     }
-            //     if let Some(break_sat) = break_sat {
-            //         ev_break.send(DisconnectTwo {
-            //             from: sat,
-            //             to: break_sat,
-            //         });
-            //     }
-            // }
         }
     }
+
+    ev_break.write_batch(batch);
 }
 
 // --------------- Handle Events ---------------
