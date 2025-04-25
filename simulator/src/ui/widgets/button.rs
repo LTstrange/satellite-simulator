@@ -1,7 +1,13 @@
 use super::*;
 
 #[derive(Component)]
-#[require(Button, Node(node), BorderRadius(|| BorderRadius::all(Val::Percent(25.))), BorderColor(|| Color::BLACK), BackgroundColor(|| OFF))]
+#[require(
+    Button,
+    Node = node(),
+    BorderRadius::all(Val::Percent(25.)),
+    BorderColor(Color::BLACK),
+    BackgroundColor(OFF)
+)]
 pub struct CusButton;
 
 fn node() -> Node {

@@ -1,3 +1,6 @@
+use display_toggle::spawn_toggle;
+use fps::fps_text;
+
 use crate::prelude::*;
 
 mod display_toggle;
@@ -15,23 +18,17 @@ impl Plugin for UserInterfacePlugin {
 }
 
 fn setup(mut commands: Commands, config: Res<Config>) {
-    commands
-        .spawn(Node {
+    commands.spawn((
+        Node {
             flex_direction: FlexDirection::Column,
             margin: UiRect::all(Val::Px(10.0)),
             ..default()
-        })
-        .with_children(|parent| {
+        },
+        children![
             // FPS
-            fps::spawn_fps_text(parent);
-
-            // Display toggle button
-            display_toggle::spawn_toggle(parent, &config);
-
-            // Refresh connection button
-            // refresh_conn::spawn_refresh_button(parent);
-
-            // Connection Saturation Rate
-            // conn_satur_rat::spawn_conn_satur_rate(parent);
-        });
+            fps_text(),
+            //Display toggle button
+            spawn_toggle(&config),
+        ],
+    ));
 }

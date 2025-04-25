@@ -41,7 +41,7 @@ fn main() -> Result<()> {
             SatellitePlugin,
             io::IOPlugin::new(port),
             UserInterfacePlugin,
-            FrameTimeDiagnosticsPlugin,
+            FrameTimeDiagnosticsPlugin::default(),
         ))
         .add_systems(Startup, setup)
         .add_systems(Update, (draw_axes,))

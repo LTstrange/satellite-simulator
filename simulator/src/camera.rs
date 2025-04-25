@@ -104,8 +104,8 @@ fn orbit_camera_system(
     mut pinch_events: EventReader<PinchGesture>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
     mut query: Query<(&mut OrbitCamera, &mut Transform)>,
-) {
-    let (mut orbit_camera, mut transform) = query.single_mut();
+) -> Result<(), BevyError> {
+    let (mut orbit_camera, mut transform) = query.single_mut()?;
 
     // x-axis rotation
     for event in mouse_wheel_events.read() {
@@ -137,4 +137,6 @@ fn orbit_camera_system(
     // 设置相机的位置，并使其始终朝向地球（即原点）
     transform.translation = Vec3::new(x, y, z);
     transform.look_at(Vec3::ZERO, Vec3::Z);
+
+    Ok(())
 }

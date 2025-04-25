@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Component)]
-#[require(Button, Node(node), BorderRadius(|| BorderRadius::all(Val::Percent(25.))), BorderColor(|| Color::BLACK))]
+#[require(Button, Node=node(), BorderRadius::all(Val::Percent(25.)), BorderColor(Color::BLACK))]
 pub struct Toggle(pub bool);
 
 fn node() -> Node {
