@@ -9,31 +9,32 @@
 - [x] ISL display.
 
 ## V0.2.0
-- [x] Brp based network control.
-- [x] add satellites using python.
-- [ ] set ISLs using python.
-- [ ] static ISL and dynamic ISL for xGrid constellation.
-- [ ] fetch ISLs using python.
+- [ ] Brp based network control.
+- [ ] Implement static and/or dynamic ISL for xGrid constellation. 
+    By using some group logic, satellites in one groud can only link to another group.
+- [ ] Python code interaction: fetch/create ISLs, add satellites/orbits, and more.
 - [ ] Better UI.
 - [ ] Better Documentation. (mdbook)
+- [ ] Accept TLE file
+- [ ] Separate orbit and satellites functionality
 
 ## Uncategorized
 
 Recording planned and future tasks.
 
 Functionality:
-- Implement some kind of double-pass connection for ISL simulation. (and set it as the default for simulation stability)
 - Realtime mode: Cant change the time speed, sync with system time, maybe useful for realtime accurate simulation.
-- Add statistic Plugin to track some important Data.
+- python control:
+    - create satellites
+    - create ISLs between satellites
 
 Bug Fix:
 - Maintain simulation when window is minimized.
 
 Perfomance:
-- Separate orbit param and satellite param, enabling calc orbit and sate movement separately.
 - Resolve performance issues caused by gizmos. (Partialy fixed, waiting for (component_gizmo/GizmoAsset))
+- Separate orbit param and satellite param, enabling calc orbit and sate movement separately.
 
 UI:
-- Tend to use ui rather than config file.
-- Connection saturation rate
 - Implement mouse drag on macos.
+- Tend to use ui and python code rather than config file.
