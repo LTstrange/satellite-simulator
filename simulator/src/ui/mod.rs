@@ -21,8 +21,6 @@ fn setup(mut commands: Commands, config: Res<Config>) {
     let orbit = config.Display.orbit;
     let connection = config.Display.connection;
 
-    info!("Orbit: {orbit}, Connection: {connection}");
-
     commands.spawn((
         Node {
             margin: UiRect::all(Val::Px(10.0)),
