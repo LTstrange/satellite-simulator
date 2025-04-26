@@ -1,5 +1,8 @@
-use display_toggle::spawn_toggle;
-use fps::fps_text;
+use bevy::{
+    color::palettes::tailwind::{SKY_700, SLATE_50},
+    ecs::{relationship::RelatedSpawner, spawn::SpawnWith},
+};
+use fps::fps;
 
 use crate::prelude::*;
 
@@ -20,15 +23,24 @@ impl Plugin for UserInterfacePlugin {
 fn setup(mut commands: Commands, config: Res<Config>) {
     commands.spawn((
         Node {
-            flex_direction: FlexDirection::Column,
             margin: UiRect::all(Val::Px(10.0)),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(10.),
             ..default()
         },
-        children![
-            // FPS
-            fps_text(),
-            //Display toggle button
-            spawn_toggle(&config),
-        ],
+        children![fps()],
     ));
+}
+
+fn button<T: Into<String>>(text: T) -> impl Bundle {
+    (
+        Button,
+        BackgroundColor(SKY_700.into()),
+        Node {
+            padding: UiRect::all(Val::Px(5.)),
+            width: Val::Px(200.),
+            ..default()
+        },
+        children![(Text::new(text), TextColor(SLATE_50.into()))],
+    )
 }

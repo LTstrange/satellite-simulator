@@ -8,16 +8,16 @@ use crate::prelude::*;
 #[derive(Component)]
 pub struct FpsText;
 
-pub fn fps_text() -> impl Bundle {
+pub fn fps() -> impl Bundle {
     (
         Text::new("FPS: "),
         TextFont::from_font_size(18.0),
-        children![
-            TextSpan::default(),
+        children![(
+            TextSpan::new("0.0"),
             TextColor(GOLD.into()),
             FpsText,
             TextFont::from_font_size(18.0),
-        ],
+        )],
     )
 }
 
