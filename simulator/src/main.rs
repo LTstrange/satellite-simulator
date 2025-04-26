@@ -24,7 +24,7 @@ mod satellite;
 mod ui;
 mod utils;
 
-fn main() -> Result<()> {
+fn main() -> Result {
     let mut config_path = std::env::current_dir()?;
     config_path.push("config.toml");
     let config = config::Config::load(&config_path)?;

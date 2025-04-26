@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use chrono::Utc;
-use std::fs::File;
 
 mod communication;
 mod orbit;
@@ -59,6 +58,7 @@ impl OrbitalElements {
             mean_anomaly: value.MEAN_ANOMALY * PI / 180.0, // degrees to rad
         }
     }
+
     // pub fn from_slice(data: &[f32; 6]) -> Result<Self, String> {
     //     let sate = Self {
     //         mean_motion: data[0],
@@ -71,7 +71,6 @@ impl OrbitalElements {
     //     if sate.eccentricity < 0.0 || sate.eccentricity >= 1.0 {
     //         return Err("Invalid eccentricity".to_string());
     //     }
-
     //     Ok(sate)
     // }
 }
@@ -94,7 +93,7 @@ fn setup(
     config: Res<Config>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+) -> Result {
     let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(1).unwrap());
     let satellite_material = materials.add(StandardMaterial {
         base_color: Color::srgb(1.0, 1.0, 1.0),
@@ -103,9 +102,8 @@ fn setup(
     });
 
     let mut data = Vec::new();
-    if let Some(data_file) = &config.Dataset {
-        let file_data = File::open(data_file.constellation_file.clone()).unwrap();
-        let satellites_data: Vec<RawSatelliteData> = serde_json::from_reader(file_data).unwrap();
+    if let Some(dataset) = &config.Dataset {
+        let satellites_data = dataset.read_from_file()?;
 
         let current_time = Utc::now();
 
@@ -124,6 +122,8 @@ fn setup(
     //     material: satellite_material,
     //     unspawned_sats: data,
     // });
+
+    Ok(())
 }
 
 // fn receive_spawn_event(

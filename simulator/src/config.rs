@@ -1,4 +1,8 @@
-use std::{io::Read, path::Path};
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+    path::Path,
+};
 
 use crate::prelude::*;
 
@@ -14,7 +18,7 @@ pub struct Config {
 
 #[derive(Deserialize)]
 pub struct Dataset {
-    pub constellation_file: String,
+    constellation_file: String,
 }
 
 #[derive(Deserialize, Default)]
@@ -39,11 +43,20 @@ pub struct Network {
 
 impl Config {
     pub fn load(file_path: &Path) -> Result<Self> {
-        let mut file = std::fs::File::open(file_path).map_err(|_| "Config file not found.")?;
+        let mut file = File::open(file_path).map_err(|_| "Config file not found.")?;
         let mut content = String::new();
         file.read_to_string(&mut content)?;
 
         let config: Config = toml::from_str(&content)?;
         Ok(config)
+    }
+}
+
+impl Dataset {
+    pub fn read_from_file(&self) -> Result<Vec<RawSatelliteData>> {
+        let file = File::open(&self.constellation_file).map_err(|_| "Dataset file not found.")?;
+        let reader = BufReader::new(file);
+        let satellites_data: Vec<RawSatelliteData> = serde_json::from_reader(reader)?;
+        Ok(satellites_data)
     }
 }

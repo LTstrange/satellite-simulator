@@ -104,7 +104,7 @@ fn orbit_camera_system(
     mut pinch_events: EventReader<PinchGesture>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
     mut query: Query<(&mut OrbitCamera, &mut Transform)>,
-) -> Result<(), BevyError> {
+) -> Result {
     let (mut orbit_camera, mut transform) = query.single_mut()?;
 
     // x-axis rotation
