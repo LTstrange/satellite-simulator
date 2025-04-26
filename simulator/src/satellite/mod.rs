@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use chrono::Utc;
 
-mod communication;
+// mod communication;
 mod orbit;
 mod satellite;
 
-use communication::*;
+// use communication::*;
 use orbit::*;
 use satellite::*;
 
@@ -15,30 +15,30 @@ pub struct SatellitePlugin;
 
 impl Plugin for SatellitePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(CommunicationPlugin);
+        // app.add_plugins(CommunicationPlugin);
 
         // app.init_resource::<SatelliteSpawner>();
 
         // app.add_event::<SpawnSatellites>();
 
         app.add_systems(Startup, setup)
-            .add_systems(
-                Update,
-                (
-                    draw_ellipse_orbit,
-                    // (receive_spawn_event, spawn_satellites).chain(),
-                ),
-            )
-            .add_systems(
-                FixedUpdate,
-                (update_mean_anomaly, update_satellite_position).chain(),
-            );
+        // .add_systems(
+        //     Update,
+        //     (
+        //         draw_ellipse_orbit,
+        //         // (receive_spawn_event, spawn_satellites).chain(),
+        //     ),
+        // )
+        // .add_systems(
+        //     FixedUpdate,
+        //     (update_mean_anomaly, update_satellite_position).chain(),
+        // )
+        ;
     }
 }
 
-#[derive(Component, Debug, Clone)]
-#[require(Connections)]
-pub struct OrbitalElements {
+// #[derive(Debug, Clone)]
+struct OrbitalElements {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角(rad)
@@ -48,7 +48,7 @@ pub struct OrbitalElements {
 }
 
 impl OrbitalElements {
-    pub fn new(value: &RawSatelliteData) -> Self {
+    fn new(value: &RawSatelliteData) -> Self {
         Self {
             mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
             eccentricity: value.ECCENTRICITY,
@@ -90,6 +90,7 @@ impl OrbitalElements {
 /// Read satellite data and Setup Satellite Spawner.
 fn setup(
     mut commands: Commands,
+    mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
     config: Res<Config>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -101,21 +102,41 @@ fn setup(
         ..default()
     });
 
-    let mut data = Vec::new();
-    if let Some(dataset) = &config.Dataset {
-        let satellites_data = dataset.read_from_file()?;
+    let data = if let Some(dataset) = &config.Dataset {
+        let raw_satellites_datas = dataset.read_from_file()?;
 
         let current_time = Utc::now();
 
-        data.extend(satellites_data.into_iter().map(|satellite_data| {
-            let observe_time = parse_time_from_str(&satellite_data.EPOCH);
-            let duration = current_time - observe_time.unwrap();
-            let mut satellite = OrbitalElements::new(&satellite_data);
-            satellite.mean_anomaly +=
-                (duration.num_seconds() as f32 * satellite.mean_motion) % (2. * PI);
-            (satellite_data.OBJECT_ID, satellite)
-        }));
+        raw_satellites_datas
+            .into_iter()
+            .map(|satellite_data| {
+                let observe_time = parse_time_from_str(&satellite_data.EPOCH);
+                let duration = current_time - observe_time.unwrap();
+                let mut satellite = OrbitalElements::new(&satellite_data);
+                satellite.mean_anomaly +=
+                    (duration.num_seconds() as f32 * satellite.mean_motion) % (2. * PI);
+                (satellite_data.OBJECT_ID, satellite)
+            })
+            .collect()
+    } else {
+        vec![]
+    };
+
+    for (satellite_id, satellite) in &data {
+        let handle = gizmo_assets.add(orbit::gen_orbit_gizmo(satellite));
+        // info!("Spawn orbit: {:?}", satellite_id);
+        commands.spawn(orbit::orbit(satellite, handle));
     }
+
+    // data.into_iter()
+    //     .map(|(_satellite_id, elements)| {
+    //         let handle = gizmo_assets.add(orbit::gen_orbit_gizmo(&elements));
+    //         info!("Spawn orbit: {:?}", _satellite_id);
+    //         orbit::orbit(elements, handle)
+    //     })
+    //     .for_each(|orbit| {
+    //         commands.spawn(orbit);
+    //     });
 
     // commands.insert_resource(SatelliteSpawner {
     //     mesh: satellite_mesh,
@@ -142,10 +163,10 @@ fn setup(
 //     for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
 //         let pos = get_position_from_orbital_elements(&satellite);
 //         let orbit = get_ellipse_orbit_data(&satellite);
-
+//
 //         assert_ne!(mesh.clone(), Handle::default());
 //         assert_ne!(material.clone(), Handle::default());
-
+//
 //         commands.spawn((
 //             satellite,
 //             Name::new(satellite_id),
@@ -156,18 +177,3 @@ fn setup(
 //         ));
 //     }
 // }
-
-// helper functions
-fn get_rotated_quat(
-    inclination: f32,
-    longitude_of_ascending_node: f32,
-    argument_of_periapsis: f32,
-) -> Quat {
-    let mut quat = Quat::IDENTITY;
-
-    // rotation
-    quat = Quat::from_rotation_x(-inclination) * quat; // rotate_x
-    quat = Quat::from_rotation_z(longitude_of_ascending_node) * quat; // rotate_z
-    quat *= Quat::from_rotation_z(-argument_of_periapsis); // rotate_local_z
-    quat
-}
