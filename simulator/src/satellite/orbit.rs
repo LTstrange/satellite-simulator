@@ -1,52 +1,69 @@
 use super::*;
 
 #[derive(Component)]
-pub struct EllipseOrbitData {
-    location: Vec3,
-    rotation: Quat,
-    half_size: Vec2,
+pub struct Orbit {
+    mean_motion: f32,                 // 平均运动(rad/s)
+    eccentricity: f32,                // 离心率
+    inclination: f32,                 // 轨道倾角(rad)
+    longitude_of_ascending_node: f32, // 升交点赤经(rad)
+    argument_of_periapsis: f32,       // 近地点角距(rad)
 }
 
-pub fn get_ellipse_orbit_data(satellite: &OrbitalElements) -> EllipseOrbitData {
+pub fn gen_orbit_gizmo(elements: &OrbitalElements) -> GizmoAsset {
     // half size of the ellipse
 
-    let n = satellite.mean_motion.powf(-2. / 3.);
+    let n = elements.mean_motion.powf(-2. / 3.);
     // a = u^(1/3) * ( n ) ^ (-2/3)
     let semi_major_axis = FACTOR * n;
     // b = a * sqrt(1 - e^2)
-    let semi_minor_axis = semi_major_axis * (1.0 - satellite.eccentricity.powi(2)).sqrt();
+    let semi_minor_axis = semi_major_axis * (1.0 - elements.eccentricity.powi(2)).sqrt();
     let half_size = Vec2::new(semi_major_axis, semi_minor_axis);
 
     let rotation = get_rotated_quat(
-        satellite.inclination,
-        satellite.longitude_of_ascending_node,
-        satellite.argument_of_periapsis,
+        elements.inclination,
+        elements.longitude_of_ascending_node,
+        elements.argument_of_periapsis,
     );
 
     // local position
     // e = c / a; c = e * a
-    let semi_focal_distance = semi_major_axis * satellite.eccentricity;
+    let semi_focal_distance = semi_major_axis * elements.eccentricity;
     let local_position = Vec3::new(-semi_focal_distance, 0.0, 0.0); // location on the orbital plane
     let location = rotation * local_position; // apply rotation to local position
-    EllipseOrbitData {
-        location,
-        rotation,
-        half_size,
-    }
+
+    let iso = Isometry3d::new(location, rotation);
+    let mut gizmo = GizmoAsset::default();
+    gizmo.ellipse(iso, half_size, Color::srgba(1., 1., 1., 0.01));
+    gizmo
 }
 
-// Gizmos
-pub fn draw_ellipse_orbit(
-    config: Res<Config>,
-    mut gizmos: Gizmos,
-    query: Query<&EllipseOrbitData>,
-) {
-    if !config.Display.orbit {
-        return;
-    }
+pub fn orbit(elements: &OrbitalElements, handle: Handle<GizmoAsset>) -> impl Bundle {
+    (
+        Orbit {
+            mean_motion: elements.mean_motion,
+            eccentricity: elements.eccentricity,
+            inclination: elements.inclination,
+            longitude_of_ascending_node: elements.longitude_of_ascending_node,
+            argument_of_periapsis: elements.argument_of_periapsis,
+        },
+        Gizmo {
+            handle,
+            ..default()
+        },
+    )
+}
 
-    for ellpise in &query {
-        let iso = Isometry3d::new(ellpise.location, ellpise.rotation);
-        gizmos.ellipse(iso, ellpise.half_size, Color::srgba(1., 1., 1., 0.01));
-    }
+// helper functions
+fn get_rotated_quat(
+    inclination: f32,
+    longitude_of_ascending_node: f32,
+    argument_of_periapsis: f32,
+) -> Quat {
+    let mut quat = Quat::IDENTITY;
+
+    // rotation
+    quat = Quat::from_rotation_x(-inclination) * quat; // rotate_x
+    quat = Quat::from_rotation_z(longitude_of_ascending_node) * quat; // rotate_z
+    quat *= Quat::from_rotation_z(-argument_of_periapsis); // rotate_local_z
+    quat
 }

@@ -123,9 +123,9 @@ fn setup(
     };
 
     for (satellite_id, satellite) in &data {
-        let handle = gizmo_assets.add(orbit::gen_orbit_gizmo(satellite));
+        let handle = gizmo_assets.add(gen_orbit_gizmo(satellite));
         // info!("Spawn orbit: {:?}", satellite_id);
-        commands.spawn(orbit::orbit(satellite, handle));
+        commands.spawn(orbit(satellite, handle));
     }
 
     // data.into_iter()
