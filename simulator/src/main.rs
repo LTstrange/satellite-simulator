@@ -22,7 +22,6 @@ mod camera;
 mod config;
 mod io;
 mod satellite;
-mod statistic;
 mod ui;
 mod utils;
 
