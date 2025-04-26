@@ -34,7 +34,7 @@ fn main() -> Result<()> {
 
     App::new()
         .insert_resource(config)
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_plugins(DefaultPlugins)
         .add_plugins((
             OrbitCameraPlugin,
             SatellitePlugin,
@@ -43,7 +43,7 @@ fn main() -> Result<()> {
             FrameTimeDiagnosticsPlugin::default(),
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (draw_axes,))
+        // .add_systems(Update, (draw_axes,))
         .run();
     Ok(())
 }
@@ -53,6 +53,7 @@ fn setup(
     mut _images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
 ) {
     // 创建一个蓝色材质表示地球
     let earth_material = materials.add(StandardMaterial {
@@ -66,8 +67,12 @@ fn setup(
         Mesh3d(meshes.add(Sphere::new(EARTH_RADIUS).mesh().uv(32, 18))),
         MeshMaterial3d(earth_material),
     ));
-}
 
-fn draw_axes(mut gizmos: Gizmos) {
-    gizmos.axes(Transform::default(), 1.5 * EARTH_RADIUS);
+    // 创建坐标轴
+    let mut gizmo = GizmoAsset::default();
+    gizmo.axes(Transform::default(), 1.5 * EARTH_RADIUS);
+    commands.spawn(Gizmo {
+        handle: gizmo_assets.add(gizmo),
+        ..default()
+    });
 }
