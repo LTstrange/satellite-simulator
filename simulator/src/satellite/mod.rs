@@ -18,16 +18,16 @@ impl Plugin for SatellitePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(CommunicationPlugin);
 
-        app.init_resource::<SatelliteSpawner>();
+        // app.init_resource::<SatelliteSpawner>();
 
-        app.add_event::<SpawnSatellites>();
+        // app.add_event::<SpawnSatellites>();
 
         app.add_systems(Startup, setup)
             .add_systems(
                 Update,
                 (
                     draw_ellipse_orbit,
-                    (receive_spawn_event, spawn_satellites).chain(),
+                    // (receive_spawn_event, spawn_satellites).chain(),
                 ),
             )
             .add_systems(
@@ -49,7 +49,7 @@ pub struct OrbitalElements {
 }
 
 impl OrbitalElements {
-    pub fn new(value: &SatelliteData) -> Self {
+    pub fn new(value: &RawSatelliteData) -> Self {
         Self {
             mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
             eccentricity: value.ECCENTRICITY,
@@ -59,34 +59,34 @@ impl OrbitalElements {
             mean_anomaly: value.MEAN_ANOMALY * PI / 180.0, // degrees to rad
         }
     }
-    pub fn from_slice(data: &[f32; 6]) -> Result<Self, String> {
-        let sate = Self {
-            mean_motion: data[0],
-            eccentricity: data[1],
-            inclination: data[2],
-            longitude_of_ascending_node: data[3],
-            argument_of_periapsis: data[4],
-            mean_anomaly: data[5],
-        };
-        if sate.eccentricity < 0.0 || sate.eccentricity >= 1.0 {
-            return Err("Invalid eccentricity".to_string());
-        }
+    // pub fn from_slice(data: &[f32; 6]) -> Result<Self, String> {
+    //     let sate = Self {
+    //         mean_motion: data[0],
+    //         eccentricity: data[1],
+    //         inclination: data[2],
+    //         longitude_of_ascending_node: data[3],
+    //         argument_of_periapsis: data[4],
+    //         mean_anomaly: data[5],
+    //     };
+    //     if sate.eccentricity < 0.0 || sate.eccentricity >= 1.0 {
+    //         return Err("Invalid eccentricity".to_string());
+    //     }
 
-        Ok(sate)
-    }
+    //     Ok(sate)
+    // }
 }
 
-#[derive(Resource, Default)]
-struct SatelliteSpawner {
-    mesh: Handle<Mesh>,
-    material: Handle<StandardMaterial>,
-    unspawned_sats: Vec<(String, OrbitalElements)>,
-}
+// #[derive(Resource, Default)]
+// struct SatelliteSpawner {
+//     mesh: Handle<Mesh>,
+//     material: Handle<StandardMaterial>,
+//     unspawned_sats: Vec<(String, OrbitalElements)>,
+// }
 
-#[derive(Event)]
-pub struct SpawnSatellites {
-    pub satellites: Vec<(String, OrbitalElements)>,
-}
+// #[derive(Event)]
+// pub struct SpawnSatellites {
+//     pub satellites: Vec<(String, OrbitalElements)>,
+// }
 
 /// Read satellite data and Setup Satellite Spawner.
 fn setup(
@@ -105,7 +105,7 @@ fn setup(
     let mut data = Vec::new();
     if let Some(data_file) = &config.Dataset {
         let file_data = File::open(data_file.constellation_file.clone()).unwrap();
-        let satellites_data: Vec<SatelliteData> = serde_json::from_reader(file_data).unwrap();
+        let satellites_data: Vec<RawSatelliteData> = serde_json::from_reader(file_data).unwrap();
 
         let current_time = Utc::now();
 
@@ -119,43 +119,43 @@ fn setup(
         }));
     }
 
-    commands.insert_resource(SatelliteSpawner {
-        mesh: satellite_mesh,
-        material: satellite_material,
-        unspawned_sats: data,
-    });
+    // commands.insert_resource(SatelliteSpawner {
+    //     mesh: satellite_mesh,
+    //     material: satellite_material,
+    //     unspawned_sats: data,
+    // });
 }
 
-fn receive_spawn_event(
-    mut event: EventReader<SpawnSatellites>,
-    mut satellite_spawner: ResMut<SatelliteSpawner>,
-) {
-    for SpawnSatellites { satellites } in event.read() {
-        println!("Receive spawn event: {}", satellites.len());
-        satellite_spawner.unspawned_sats.extend(satellites.clone());
-    }
-}
+// fn receive_spawn_event(
+//     mut event: EventReader<SpawnSatellites>,
+//     mut satellite_spawner: ResMut<SatelliteSpawner>,
+// ) {
+//     for SpawnSatellites { satellites } in event.read() {
+//         println!("Receive spawn event: {}", satellites.len());
+//         satellite_spawner.unspawned_sats.extend(satellites.clone());
+//     }
+// }
 
-fn spawn_satellites(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
-    let mesh = satellite_spawner.mesh.clone();
-    let material = satellite_spawner.material.clone();
-    for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
-        let pos = get_position_from_orbital_elements(&satellite);
-        let orbit = get_ellipse_orbit_data(&satellite);
+// fn spawn_satellites(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
+//     let mesh = satellite_spawner.mesh.clone();
+//     let material = satellite_spawner.material.clone();
+//     for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
+//         let pos = get_position_from_orbital_elements(&satellite);
+//         let orbit = get_ellipse_orbit_data(&satellite);
 
-        assert_ne!(mesh.clone(), Handle::default());
-        assert_ne!(material.clone(), Handle::default());
+//         assert_ne!(mesh.clone(), Handle::default());
+//         assert_ne!(material.clone(), Handle::default());
 
-        commands.spawn((
-            satellite,
-            Name::new(satellite_id),
-            Mesh3d(mesh.clone()),
-            MeshMaterial3d(material.clone()),
-            Transform::from_translation(pos),
-            orbit,
-        ));
-    }
-}
+//         commands.spawn((
+//             satellite,
+//             Name::new(satellite_id),
+//             Mesh3d(mesh.clone()),
+//             MeshMaterial3d(material.clone()),
+//             Transform::from_translation(pos),
+//             orbit,
+//         ));
+//     }
+// }
 
 // helper functions
 fn get_rotated_quat(

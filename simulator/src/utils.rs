@@ -24,7 +24,7 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 /// }
 #[allow(non_snake_case)]
 #[derive(Deserialize, Debug, Clone)]
-pub struct SatelliteData {
+pub struct RawSatelliteData {
     pub OBJECT_ID: String,
     pub EPOCH: String,
     pub MEAN_MOTION: f32, // (rev/day)

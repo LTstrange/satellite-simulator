@@ -20,7 +20,7 @@ use ui::UserInterfacePlugin;
 
 mod camera;
 mod config;
-mod io;
+// mod io;
 mod satellite;
 mod ui;
 mod utils;
@@ -30,7 +30,7 @@ fn main() -> Result<()> {
     config_path.push("config.toml");
     let config = config::Config::load(&config_path)?;
 
-    let port = config.Network.port;
+    let _port = config.Network.port;
 
     App::new()
         .insert_resource(config)
@@ -38,7 +38,7 @@ fn main() -> Result<()> {
         .add_plugins((
             OrbitCameraPlugin,
             SatellitePlugin,
-            io::IOPlugin::new(port),
+            // io::IOPlugin::new(port),
             UserInterfacePlugin,
             FrameTimeDiagnosticsPlugin::default(),
         ))
