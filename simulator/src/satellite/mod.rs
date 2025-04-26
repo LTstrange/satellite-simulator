@@ -3,12 +3,12 @@ use chrono::Utc;
 use std::fs::File;
 
 mod communication;
-mod motion;
 mod orbit;
+mod satellite;
 
 use communication::*;
-use motion::*;
 use orbit::*;
+use satellite::*;
 
 const FACTOR: f32 = 73.594_6; // u^(1/3)
 
