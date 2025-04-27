@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use chrono::Utc;
 
-// mod communication;
+mod communication;
 mod orbit;
 mod satellite;
 
-// use communication::*;
+use communication::*;
 use orbit::*;
 use satellite::*;
 
@@ -15,20 +15,14 @@ pub struct SatellitePlugin;
 
 impl Plugin for SatellitePlugin {
     fn build(&self, app: &mut App) {
-        // app.add_plugins(CommunicationPlugin);
+        app.add_plugins(CommunicationPlugin);
 
-        // app.init_resource::<SatelliteSpawner>();
+        app.init_resource::<SatelliteSpawner>();
 
-        // app.add_event::<SpawnSatellites>();
+        app.add_event::<SpawnSatellites>();
 
         app.add_systems(Startup, setup)
-            // .add_systems(
-            //     Update,
-            //     (
-            //         draw_ellipse_orbit,
-            //         // (receive_spawn_event, spawn_satellites).chain(),
-            //     ),
-            // )
+            .add_systems(Update, (receive_spawn_event, spawn_satellites).chain())
             .add_systems(
                 FixedUpdate,
                 (update_mean_anomaly, update_satellite_position).chain(),

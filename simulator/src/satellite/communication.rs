@@ -1,5 +1,6 @@
 use rand::{rng, seq::SliceRandom};
 
+use super::satellite::Satellite;
 use crate::prelude::*;
 
 pub struct CommunicationPlugin;
@@ -60,7 +61,7 @@ pub struct DisconnectAll;
 fn mark_satellites_try_connect(
     mut commands: Commands,
     config: Res<Config>,
-    satellites: Query<(Entity, &Connections), (With<OrbitalElements>, Without<TryConnect>)>,
+    satellites: Query<(Entity, &Connections), (With<Satellite>, Without<TryConnect>)>,
 ) {
     let mut rng = rng();
 
@@ -102,11 +103,11 @@ fn connect_nearest(
     mut commands: Commands,
     from_satellites: Query<
         (Entity, &Connections, &GlobalTransform),
-        (With<OrbitalElements>, With<TryConnect>),
+        (With<Satellite>, With<TryConnect>),
     >,
     to_satellites: Query<
         (Entity, &Connections, &GlobalTransform),
-        (With<OrbitalElements>, Without<TryConnect>),
+        (With<Satellite>, Without<TryConnect>),
     >,
     mut connections: EventWriter<ConnectTwo>,
 ) {
@@ -153,7 +154,7 @@ fn connect_nearest(
 
 fn disconnect_farthest(
     config: Res<Config>,
-    satellites: Query<(Entity, &Connections, &GlobalTransform), With<OrbitalElements>>,
+    satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
     mut ev_break: EventWriter<DisconnectTwo>,
 ) {
     let mut batch = vec![];
@@ -191,7 +192,7 @@ fn disconnect_farthest(
 /// Connect two satellites, based on Connection Events
 fn handle_connection(
     config: Res<Config>,
-    mut satellites: Query<(Entity, &mut Connections), With<OrbitalElements>>,
+    mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
     mut connections: EventReader<ConnectTwo>,
 ) {
     for ConnectTwo { from, to } in connections.read() {
@@ -211,7 +212,7 @@ fn handle_connection(
 
 /// Disconnect two satellites, based on Disconnection Events
 fn handle_disconnection(
-    mut satellites: Query<(Entity, &mut Connections), With<OrbitalElements>>,
+    mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
     mut connections: EventReader<DisconnectTwo>,
 ) {
     for DisconnectTwo { from, to } in connections.read() {
@@ -226,7 +227,7 @@ fn handle_disconnection(
 fn handle_disconnect_all(
     mut commands: Commands,
     mut e: EventReader<DisconnectAll>,
-    mut satellites: Query<(Entity, &mut Connections), With<OrbitalElements>>,
+    mut satellites: Query<(Entity, &mut Connections), With<Satellite>>,
 ) {
     for _ in e.read() {
         // println!("Disconnecting all satellites");
@@ -242,7 +243,7 @@ fn handle_disconnect_all(
 fn draw_connections(
     config: Res<Config>,
     mut gizmos: Gizmos,
-    satellites: Query<(Entity, &Connections, &GlobalTransform), With<OrbitalElements>>,
+    satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
 ) {
     if !config.Display.connection {
         return;

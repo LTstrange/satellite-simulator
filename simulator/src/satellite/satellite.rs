@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Component)]
-#[require(Transform)]
+#[require(Transform, Connections)]
 pub struct Satellite {
     pub mean_anomaly: f32, // 平近点角(rad)
 }
