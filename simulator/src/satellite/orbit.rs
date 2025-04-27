@@ -42,14 +42,6 @@ pub fn orbit(
     mesh: Handle<Mesh>,
     mat: Handle<StandardMaterial>,
 ) -> impl Bundle {
-    //         commands.spawn((
-    //             satellite,
-    //             Name::new(satellite_id),
-    //             Mesh3d(mesh.clone()),
-    //             MeshMaterial3d(material.clone()),
-    //             Transform::from_translation(pos),
-    //             orbit,
-    //         ));
     let pos = get_position_from_orbital_elements(elements);
     (
         Orbit {
