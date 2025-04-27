@@ -2,16 +2,15 @@ use super::*;
 
 #[derive(Component)]
 pub struct Orbit {
-    mean_motion: f32,                 // 平均运动(rad/s)
-    eccentricity: f32,                // 离心率
-    inclination: f32,                 // 轨道倾角(rad)
-    longitude_of_ascending_node: f32, // 升交点赤经(rad)
-    argument_of_periapsis: f32,       // 近地点角距(rad)
+    pub mean_motion: f32,                 // 平均运动(rad/s)
+    pub eccentricity: f32,                // 离心率
+    pub inclination: f32,                 // 轨道倾角(rad)
+    pub longitude_of_ascending_node: f32, // 升交点赤经(rad)
+    pub argument_of_periapsis: f32,       // 近地点角距(rad)
 }
 
-pub fn gen_orbit_gizmo(elements: &OrbitalElements) -> GizmoAsset {
+pub fn draw_orbit_gizmo(elements: &OrbitalElements, gizmo: &mut GizmoAsset) {
     // half size of the ellipse
-
     let n = elements.mean_motion.powf(-2. / 3.);
     // a = u^(1/3) * ( n ) ^ (-2/3)
     let semi_major_axis = FACTOR * n;
@@ -19,6 +18,7 @@ pub fn gen_orbit_gizmo(elements: &OrbitalElements) -> GizmoAsset {
     let semi_minor_axis = semi_major_axis * (1.0 - elements.eccentricity.powi(2)).sqrt();
     let half_size = Vec2::new(semi_major_axis, semi_minor_axis);
 
+    // rotation
     let rotation = get_rotated_quat(
         elements.inclination,
         elements.longitude_of_ascending_node,
@@ -32,12 +32,25 @@ pub fn gen_orbit_gizmo(elements: &OrbitalElements) -> GizmoAsset {
     let location = rotation * local_position; // apply rotation to local position
 
     let iso = Isometry3d::new(location, rotation);
-    let mut gizmo = GizmoAsset::default();
+
     gizmo.ellipse(iso, half_size, Color::srgba(1., 1., 1., 0.01));
-    gizmo
 }
 
-pub fn orbit(elements: &OrbitalElements, handle: Handle<GizmoAsset>) -> impl Bundle {
+pub fn orbit<T: Into<String>>(
+    sate_name: T,
+    elements: &OrbitalElements,
+    mesh: Handle<Mesh>,
+    mat: Handle<StandardMaterial>,
+) -> impl Bundle {
+    //         commands.spawn((
+    //             satellite,
+    //             Name::new(satellite_id),
+    //             Mesh3d(mesh.clone()),
+    //             MeshMaterial3d(material.clone()),
+    //             Transform::from_translation(pos),
+    //             orbit,
+    //         ));
+    let pos = get_position_from_orbital_elements(elements);
     (
         Orbit {
             mean_motion: elements.mean_motion,
@@ -46,15 +59,23 @@ pub fn orbit(elements: &OrbitalElements, handle: Handle<GizmoAsset>) -> impl Bun
             longitude_of_ascending_node: elements.longitude_of_ascending_node,
             argument_of_periapsis: elements.argument_of_periapsis,
         },
-        Gizmo {
-            handle,
-            ..default()
-        },
+        related!(
+            FollowedBy[(
+                Satellite {
+                    mean_anomaly: elements.mean_anomaly,
+                },
+                Name::new(sate_name.into()),
+                Mesh3d(mesh),
+                MeshMaterial3d(mat),
+                Transform::from_translation(pos),
+            )]
+        ),
     )
 }
 
 // helper functions
-fn get_rotated_quat(
+#[inline]
+pub fn get_rotated_quat(
     inclination: f32,
     longitude_of_ascending_node: f32,
     argument_of_periapsis: f32,

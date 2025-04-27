@@ -22,18 +22,17 @@ impl Plugin for SatellitePlugin {
         // app.add_event::<SpawnSatellites>();
 
         app.add_systems(Startup, setup)
-        // .add_systems(
-        //     Update,
-        //     (
-        //         draw_ellipse_orbit,
-        //         // (receive_spawn_event, spawn_satellites).chain(),
-        //     ),
-        // )
-        // .add_systems(
-        //     FixedUpdate,
-        //     (update_mean_anomaly, update_satellite_position).chain(),
-        // )
-        ;
+            // .add_systems(
+            //     Update,
+            //     (
+            //         draw_ellipse_orbit,
+            //         // (receive_spawn_event, spawn_satellites).chain(),
+            //     ),
+            // )
+            .add_systems(
+                FixedUpdate,
+                (update_mean_anomaly, update_satellite_position).chain(),
+            );
     }
 }
 
@@ -56,6 +55,17 @@ impl OrbitalElements {
             argument_of_periapsis: value.ARG_OF_PERICENTER * PI / 180.0, // degrees to rad
             longitude_of_ascending_node: value.RA_OF_ASC_NODE * PI / 180.0, // degrees to rad
             mean_anomaly: value.MEAN_ANOMALY * PI / 180.0, // degrees to rad
+        }
+    }
+
+    pub fn from_orbit_n_sate(orbit: &Orbit, sate: &Satellite) -> Self {
+        Self {
+            mean_motion: orbit.mean_motion,
+            eccentricity: orbit.eccentricity,
+            inclination: orbit.inclination,
+            longitude_of_ascending_node: orbit.longitude_of_ascending_node,
+            argument_of_periapsis: orbit.argument_of_periapsis,
+            mean_anomaly: sate.mean_anomaly,
         }
     }
 
@@ -122,21 +132,22 @@ fn setup(
         vec![]
     };
 
+    let mut gizmo = GizmoAsset::default();
     for (satellite_id, satellite) in &data {
-        let handle = gizmo_assets.add(gen_orbit_gizmo(satellite));
+        draw_orbit_gizmo(satellite, &mut gizmo);
         // info!("Spawn orbit: {:?}", satellite_id);
-        commands.spawn(orbit(satellite, handle));
+        commands.spawn(orbit(
+            satellite_id,
+            satellite,
+            satellite_mesh.clone(),
+            satellite_material.clone(),
+        ));
     }
 
-    // data.into_iter()
-    //     .map(|(_satellite_id, elements)| {
-    //         let handle = gizmo_assets.add(orbit::gen_orbit_gizmo(&elements));
-    //         info!("Spawn orbit: {:?}", _satellite_id);
-    //         orbit::orbit(elements, handle)
-    //     })
-    //     .for_each(|orbit| {
-    //         commands.spawn(orbit);
-    //     });
+    commands.spawn(Gizmo {
+        handle: gizmo_assets.add(gizmo),
+        ..default()
+    });
 
     // commands.insert_resource(SatelliteSpawner {
     //     mesh: satellite_mesh,
