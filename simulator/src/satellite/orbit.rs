@@ -36,8 +36,8 @@ pub fn draw_orbit_gizmo(elements: &OrbitalElements, gizmo: &mut GizmoAsset) {
     gizmo.ellipse(iso, half_size, Color::srgba(1., 1., 1., 0.01));
 }
 
-pub fn orbit<T: Into<String>>(
-    sate_name: T,
+pub fn orbit(
+    sate_name: String,
     elements: &OrbitalElements,
     mesh: Handle<Mesh>,
     mat: Handle<StandardMaterial>,
@@ -64,7 +64,7 @@ pub fn orbit<T: Into<String>>(
                 Satellite {
                     mean_anomaly: elements.mean_anomaly,
                 },
-                Name::new(sate_name.into()),
+                Name::new(sate_name),
                 Mesh3d(mesh),
                 MeshMaterial3d(mat),
                 Transform::from_translation(pos),

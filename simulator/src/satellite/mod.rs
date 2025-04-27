@@ -137,7 +137,7 @@ fn setup(
         draw_orbit_gizmo(satellite, &mut gizmo);
         // info!("Spawn orbit: {:?}", satellite_id);
         commands.spawn(orbit(
-            satellite_id,
+            satellite_id.to_string(),
             satellite,
             satellite_mesh.clone(),
             satellite_material.clone(),
