@@ -36,8 +36,8 @@ impl Plugin for SatellitePlugin {
     }
 }
 
-// #[derive(Debug, Clone)]
-struct OrbitalElements {
+#[derive(Debug, Clone)]
+pub struct OrbitalElements {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角(rad)
@@ -69,33 +69,33 @@ impl OrbitalElements {
         }
     }
 
-    // pub fn from_slice(data: &[f32; 6]) -> Result<Self, String> {
-    //     let sate = Self {
-    //         mean_motion: data[0],
-    //         eccentricity: data[1],
-    //         inclination: data[2],
-    //         longitude_of_ascending_node: data[3],
-    //         argument_of_periapsis: data[4],
-    //         mean_anomaly: data[5],
-    //     };
-    //     if sate.eccentricity < 0.0 || sate.eccentricity >= 1.0 {
-    //         return Err("Invalid eccentricity".to_string());
-    //     }
-    //     Ok(sate)
-    // }
+    pub fn from_slice(data: &[f32; 6]) -> Result<Self, String> {
+        let sate = Self {
+            mean_motion: data[0],
+            eccentricity: data[1],
+            inclination: data[2],
+            longitude_of_ascending_node: data[3],
+            argument_of_periapsis: data[4],
+            mean_anomaly: data[5],
+        };
+        if sate.eccentricity < 0.0 || sate.eccentricity >= 1.0 {
+            return Err("Invalid eccentricity".to_string());
+        }
+        Ok(sate)
+    }
 }
 
-// #[derive(Resource, Default)]
-// struct SatelliteSpawner {
-//     mesh: Handle<Mesh>,
-//     material: Handle<StandardMaterial>,
-//     unspawned_sats: Vec<(String, OrbitalElements)>,
-// }
+#[derive(Resource, Default)]
+struct SatelliteSpawner {
+    mesh: Handle<Mesh>,
+    material: Handle<StandardMaterial>,
+    unspawned_sats: Vec<(String, OrbitalElements)>,
+}
 
-// #[derive(Event)]
-// pub struct SpawnSatellites {
-//     pub satellites: Vec<(String, OrbitalElements)>,
-// }
+#[derive(Event)]
+pub struct SpawnSatellites {
+    pub satellites: Vec<(String, OrbitalElements)>,
+}
 
 /// Read satellite data and Setup Satellite Spawner.
 fn setup(
@@ -149,42 +149,37 @@ fn setup(
         ..default()
     });
 
-    // commands.insert_resource(SatelliteSpawner {
-    //     mesh: satellite_mesh,
-    //     material: satellite_material,
-    //     unspawned_sats: data,
-    // });
+    commands.insert_resource(SatelliteSpawner {
+        mesh: satellite_mesh,
+        material: satellite_material,
+        unspawned_sats: data,
+    });
 
     Ok(())
 }
 
-// fn receive_spawn_event(
-//     mut event: EventReader<SpawnSatellites>,
-//     mut satellite_spawner: ResMut<SatelliteSpawner>,
-// ) {
-//     for SpawnSatellites { satellites } in event.read() {
-//         println!("Receive spawn event: {}", satellites.len());
-//         satellite_spawner.unspawned_sats.extend(satellites.clone());
-//     }
-// }
+fn receive_spawn_event(
+    mut event: EventReader<SpawnSatellites>,
+    mut satellite_spawner: ResMut<SatelliteSpawner>,
+) {
+    for SpawnSatellites { satellites } in event.read() {
+        println!("Receive spawn event: {}", satellites.len());
+        satellite_spawner.unspawned_sats.extend(satellites.clone());
+    }
+}
 
-// fn spawn_satellites(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
-//     let mesh = satellite_spawner.mesh.clone();
-//     let material = satellite_spawner.material.clone();
-//     for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
-//         let pos = get_position_from_orbital_elements(&satellite);
-//         let orbit = get_ellipse_orbit_data(&satellite);
-//
-//         assert_ne!(mesh.clone(), Handle::default());
-//         assert_ne!(material.clone(), Handle::default());
-//
-//         commands.spawn((
-//             satellite,
-//             Name::new(satellite_id),
-//             Mesh3d(mesh.clone()),
-//             MeshMaterial3d(material.clone()),
-//             Transform::from_translation(pos),
-//             orbit,
-//         ));
-//     }
-// }
+fn spawn_satellites(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
+    let mesh = satellite_spawner.mesh.clone();
+    let material = satellite_spawner.material.clone();
+    for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
+        assert_ne!(mesh.clone(), Handle::default());
+        assert_ne!(material.clone(), Handle::default());
+
+        commands.spawn(orbit(
+            satellite_id.to_string(),
+            &satellite,
+            mesh.clone(),
+            material.clone(),
+        ));
+    }
+}
