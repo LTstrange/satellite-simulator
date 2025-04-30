@@ -10,13 +10,14 @@
 
 ## V0.2.0
 - [x] Separate orbit and satellites functionality
+- [ ] Accept TLE file
+- [ ] Better UI.
+- [ ] use entity relationship to discribe connections.
 - [ ] Brp based network control.
 - [ ] Implement static and/or dynamic ISL for xGrid constellation. 
     By using some group logic, satellites in one groud can only link to another group.
 - [ ] Python code interaction: fetch/create ISLs, add satellites/orbits, and more.
-- [ ] Better UI.
 - [ ] Better Documentation. (mdbook)
-- [ ] Accept TLE file
 
 ## Uncategorized
 
@@ -32,7 +33,8 @@ Bug Fix:
 - Maintain simulation when window is minimized.
 
 Perfomance:
+- use relationship to describe connections
 
 UI:
-- Implement mouse drag on macos.
 - Tend to use ui and python code rather than config file.
+- Implement mouse drag on macos.
