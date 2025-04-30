@@ -79,7 +79,7 @@ fn mark_satellites_try_connect(
         .iter()
         .filter_map(|(s, c)| {
             // filter out satellites that already saturate their connections
-            if c.connections.len() < config.Simulation.connection_number {
+            if c.connections.len() < config.simulation.connection_number {
                 Some((s, c.connections.len()))
             } else {
                 None
@@ -89,7 +89,7 @@ fn mark_satellites_try_connect(
 
     // try to make sure one sat could connect to `connection_number` satellites
     let part_of_unfull_sats_num =
-        unfull_satellites.len() / (config.Simulation.connection_number + 1);
+        unfull_satellites.len() / (config.simulation.connection_number + 1);
 
     unfull_satellites.shuffle(&mut rng); // O(n)
     unfull_satellites.sort_unstable_by_key(|(_, c)| *c); // O(n * log(connection_number)) ~ O(n)
@@ -112,8 +112,8 @@ fn connect_nearest(
     mut connections: EventWriter<ConnectTwo>,
 ) {
     // get configuration parameters
-    let connection_num = config.Simulation.connection_number;
-    let connection_dist = config.Simulation.connection_distance;
+    let connection_num = config.simulation.connection_number;
+    let connection_dist = config.simulation.connection_distance;
 
     // get all sats which are trying to connect, and get their global positions
     let from_sats_iter = from_satellites
@@ -170,7 +170,7 @@ fn disconnect_farthest(
             let dis_sq = other_loc.distance_squared(cur_loc);
             // break the connection which exceeds the connection distance
             if dis_sq
-                > config.Simulation.connection_distance * config.Simulation.connection_distance
+                > config.simulation.connection_distance * config.simulation.connection_distance
             {
                 // ev_break.write(DisconnectTwo {
                 //     from: sat,
@@ -198,15 +198,15 @@ fn handle_connection(
     for ConnectTwo { from, to } in connections.read() {
         // println!("Connected {} and {}", from, to);
         let mut to_conn: Mut<'_, Connections> = satellites.get_mut(*to).unwrap().1;
-        if to_conn.connections.len() >= config.Simulation.connection_number {
+        if to_conn.connections.len() >= config.simulation.connection_number {
             continue;
         }
         to_conn.connections.push(*from);
-        assert!(to_conn.connections.len() <= config.Simulation.connection_number);
+        assert!(to_conn.connections.len() <= config.simulation.connection_number);
 
         let mut from_conn = satellites.get_mut(*from).unwrap().1;
         from_conn.connections.push(*to);
-        assert!(from_conn.connections.len() <= config.Simulation.connection_number);
+        assert!(from_conn.connections.len() <= config.simulation.connection_number);
     }
 }
 
@@ -245,7 +245,7 @@ fn draw_connections(
     mut gizmos: Gizmos,
     satellites: Query<(Entity, &Connections, &GlobalTransform), With<Satellite>>,
 ) {
-    if !config.Display.connection {
+    if !config.display.connection {
         return;
     }
     for (e, connections, global_trans) in &satellites {

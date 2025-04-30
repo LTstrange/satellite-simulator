@@ -17,12 +17,12 @@ impl Plugin for SatellitePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(CommunicationPlugin);
 
-        app.init_resource::<SatelliteSpawner>();
+        // app.init_resource::<SatelliteSpawner>();
 
-        app.add_event::<SpawnSatellites>();
+        // app.add_event::<SpawnSatellites>();
 
         app.add_systems(Startup, setup)
-            .add_systems(Update, (receive_spawn_event, spawn_satellites).chain())
+            // .add_systems(Update, (receive_spawn_event, spawn_satellites).chain())
             .add_systems(
                 FixedUpdate,
                 (update_mean_anomaly, update_satellite_position).chain(),
@@ -43,12 +43,12 @@ pub struct OrbitalElements {
 impl OrbitalElements {
     fn new(value: &RawSatelliteData) -> Self {
         Self {
-            mean_motion: value.MEAN_MOTION * 2. * PI / 86400.0, // rev/day to rad/s
-            eccentricity: value.ECCENTRICITY,
-            inclination: value.INCLINATION * PI / 180.0, // degrees to rad
-            argument_of_periapsis: value.ARG_OF_PERICENTER * PI / 180.0, // degrees to rad
-            longitude_of_ascending_node: value.RA_OF_ASC_NODE * PI / 180.0, // degrees to rad
-            mean_anomaly: value.MEAN_ANOMALY * PI / 180.0, // degrees to rad
+            mean_motion: value.mean_motion * 2. * PI / 86400.0, // rev/day to rad/s
+            eccentricity: value.eccentricity,
+            inclination: value.inclination * PI / 180.0, // degrees to rad
+            argument_of_periapsis: value.arg_of_pericenter * PI / 180.0, // degrees to rad
+            longitude_of_ascending_node: value.ra_of_asc_node * PI / 180.0, // degrees to rad
+            mean_anomaly: value.mean_anomaly * PI / 180.0, // degrees to rad
         }
     }
 
@@ -79,17 +79,17 @@ impl OrbitalElements {
     }
 }
 
-#[derive(Resource, Default)]
-struct SatelliteSpawner {
-    mesh: Handle<Mesh>,
-    material: Handle<StandardMaterial>,
-    unspawned_sats: Vec<(String, OrbitalElements)>,
-}
+// #[derive(Resource, Default)]
+// struct SatelliteSpawner {
+//     mesh: Handle<Mesh>,
+//     material: Handle<StandardMaterial>,
+//     unspawned_sats: Vec<(String, OrbitalElements)>,
+// }
 
-#[derive(Event)]
-pub struct SpawnSatellites {
-    pub satellites: Vec<(String, OrbitalElements)>,
-}
+// #[derive(Event)]
+// pub struct SpawnSatellites {
+//     pub satellites: Vec<(String, OrbitalElements)>,
+// }
 
 /// Read satellite data and Setup Satellite Spawner.
 fn setup(
@@ -106,7 +106,7 @@ fn setup(
         ..default()
     });
 
-    let data = if let Some(dataset) = &config.Dataset {
+    let data = if let Some(dataset) = &config.dataset {
         let raw_satellites_datas = dataset.read_from_file()?;
 
         let current_time = Utc::now();
@@ -114,12 +114,12 @@ fn setup(
         raw_satellites_datas
             .into_iter()
             .map(|satellite_data| {
-                let observe_time = parse_time_from_str(&satellite_data.EPOCH);
+                let observe_time = parse_time_from_str(&satellite_data.epoch);
                 let duration = current_time - observe_time.unwrap();
                 let mut satellite = OrbitalElements::new(&satellite_data);
                 satellite.mean_anomaly +=
                     (duration.num_seconds() as f32 * satellite.mean_motion) % (2. * PI);
-                (satellite_data.OBJECT_ID, satellite)
+                (satellite_data.object_id, satellite)
             })
             .collect()
     } else {
@@ -143,37 +143,37 @@ fn setup(
         ..default()
     });
 
-    commands.insert_resource(SatelliteSpawner {
-        mesh: satellite_mesh,
-        material: satellite_material,
-        unspawned_sats: data,
-    });
+    // commands.insert_resource(SatelliteSpawner {
+    //     mesh: satellite_mesh,
+    //     material: satellite_material,
+    //     unspawned_sats: data,
+    // });
 
     Ok(())
 }
 
-fn receive_spawn_event(
-    mut event: EventReader<SpawnSatellites>,
-    mut satellite_spawner: ResMut<SatelliteSpawner>,
-) {
-    for SpawnSatellites { satellites } in event.read() {
-        println!("Receive spawn event: {}", satellites.len());
-        satellite_spawner.unspawned_sats.extend(satellites.clone());
-    }
-}
+// fn receive_spawn_event(
+//     mut event: EventReader<SpawnSatellites>,
+//     mut satellite_spawner: ResMut<SatelliteSpawner>,
+// ) {
+//     for SpawnSatellites { satellites } in event.read() {
+//         println!("Receive spawn event: {}", satellites.len());
+//         satellite_spawner.unspawned_sats.extend(satellites.clone());
+//     }
+// }
 
-fn spawn_satellites(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
-    let mesh = satellite_spawner.mesh.clone();
-    let material = satellite_spawner.material.clone();
-    for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
-        assert_ne!(mesh.clone(), Handle::default());
-        assert_ne!(material.clone(), Handle::default());
+// fn spawn_satellites(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
+//     let mesh = satellite_spawner.mesh.clone();
+//     let material = satellite_spawner.material.clone();
+//     for (satellite_id, satellite) in satellite_spawner.unspawned_sats.drain(..) {
+//         assert_ne!(mesh.clone(), Handle::default());
+//         assert_ne!(material.clone(), Handle::default());
 
-        commands.spawn(orbit(
-            satellite_id.to_string(),
-            &satellite,
-            mesh.clone(),
-            material.clone(),
-        ));
-    }
-}
+//         commands.spawn(orbit(
+//             satellite_id.to_string(),
+//             &satellite,
+//             mesh.clone(),
+//             material.clone(),
+//         ));
+//     }
+// }

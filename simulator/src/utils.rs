@@ -22,17 +22,24 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 ///     "MEAN_MOTION_DOT":4.255e-5,
 ///     "MEAN_MOTION_DDOT":0
 /// }
-#[allow(non_snake_case)]
 #[derive(Deserialize, Debug, Clone)]
 pub struct RawSatelliteData {
-    pub OBJECT_ID: String,
-    pub EPOCH: String,
-    pub MEAN_MOTION: f32, // (rev/day)
-    pub ECCENTRICITY: f32,
-    pub INCLINATION: f32,       // (degrees)
-    pub RA_OF_ASC_NODE: f32,    // (degrees)
-    pub ARG_OF_PERICENTER: f32, // (degrees)
-    pub MEAN_ANOMALY: f32,      // (degrees)
+    #[serde(rename = "OBJECT_ID")]
+    pub object_id: String,
+    #[serde(rename = "EPOCH")]
+    pub epoch: String,
+    #[serde(rename = "MEAN_MOTION")]
+    pub mean_motion: f32, // (rev/day)
+    #[serde(rename = "ECCENTRICITY")]
+    pub eccentricity: f32,
+    #[serde(rename = "INCLINATION")]
+    pub inclination: f32, // (degrees)
+    #[serde(rename = "RA_OF_ASC_NODE")]
+    pub ra_of_asc_node: f32, // (degrees)
+    #[serde(rename = "ARG_OF_PERICENTER")]
+    pub arg_of_pericenter: f32, // (degrees)
+    #[serde(rename = "MEAN_ANOMALY")]
+    pub mean_anomaly: f32, // (degrees)
 }
 
 // Copy from rastro crate (https://github.com/duncaneddy/rastro)

@@ -6,37 +6,39 @@ use std::{
 
 use crate::prelude::*;
 
-#[allow(non_snake_case)]
-#[derive(Deserialize, Resource)]
+#[derive(Deserialize, Resource, Debug)]
 pub struct Config {
-    pub Dataset: Option<Dataset>,
-    #[serde(default)]
-    pub Display: Display,
-    pub Simulation: Simulation,
-    pub Network: Network,
+    #[serde(rename = "Dataset")]
+    pub dataset: Option<Dataset>,
+    #[serde(rename = "Display")]
+    pub display: Display,
+    #[serde(rename = "Simulation")]
+    pub simulation: Simulation,
+    #[serde(rename = "Network")]
+    pub network: Network,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Dataset {
     constellation_file: String,
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Display {
-    #[serde(default)]
+    // #[serde(default)]
     pub orbit: bool,
-    #[serde(default)]
+    // #[serde(default)]
     pub connection: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Simulation {
     pub time_speed: f32,
     pub connection_distance: f32,
     pub connection_number: usize,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Network {
     pub port: u16,
 }
@@ -58,5 +60,17 @@ impl Dataset {
         let reader = BufReader::new(file);
         let satellites_data: Vec<RawSatelliteData> = serde_json::from_reader(reader)?;
         Ok(satellites_data)
+    }
+}
+
+mod test {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_load_config() {
+        let config_path = PathBuf::from("config.toml");
+        let config = Config::load(&config_path).unwrap();
+        println!("{:?}", config);
     }
 }
