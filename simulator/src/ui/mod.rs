@@ -19,7 +19,7 @@ impl Plugin for UserInterfacePlugin {
     }
 }
 
-fn setup(mut commands: Commands, config: Res<Config>) {
+fn setup(mut commands: Commands, _config: Res<Config>) {
     commands.spawn((
         Node {
             margin: UiRect::all(Val::Px(10.0)),

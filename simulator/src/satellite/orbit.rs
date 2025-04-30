@@ -42,15 +42,10 @@ pub fn orbit(
     mesh: Handle<Mesh>,
     mat: Handle<StandardMaterial>,
 ) -> impl Bundle {
-    let pos = get_position_from_orbital_elements(elements);
+    let (orbit, mean_anomaly) = elements.sep_out_mean_anomaly();
+    let pos = get_pos_from_elements(&orbit, mean_anomaly);
     (
-        Orbit {
-            mean_motion: elements.mean_motion,
-            eccentricity: elements.eccentricity,
-            inclination: elements.inclination,
-            longitude_of_ascending_node: elements.longitude_of_ascending_node,
-            argument_of_periapsis: elements.argument_of_periapsis,
-        },
+        orbit,
         related!(
             FollowedBy[(
                 Satellite {

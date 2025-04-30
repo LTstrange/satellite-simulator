@@ -56,9 +56,11 @@ impl Config {
 
 impl Dataset {
     pub fn read_from_file(&self) -> Result<Vec<RawSatelliteData>> {
+        info!("Reading dataset from file: {}", self.constellation_file);
         let file = File::open(&self.constellation_file).map_err(|_| "Dataset file not found.")?;
         let reader = BufReader::new(file);
         let satellites_data: Vec<RawSatelliteData> = serde_json::from_reader(reader)?;
+
         Ok(satellites_data)
     }
 }
@@ -101,16 +103,4 @@ pub struct RawSatelliteData {
     pub arg_of_pericenter: f32, // (degrees)
     #[serde(rename = "MEAN_ANOMALY")]
     pub mean_anomaly: f32, // (degrees)
-}
-
-mod test {
-    use super::*;
-    use std::path::PathBuf;
-
-    #[test]
-    fn test_load_config() {
-        let config_path = PathBuf::from("config.toml");
-        let config = Config::load(&config_path).unwrap();
-        println!("{:?}", config);
-    }
 }

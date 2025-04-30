@@ -39,17 +39,15 @@ pub fn update_satellite_position(
     for (orbit, sates) in orbits {
         for sate in &sates.0 {
             let (mut transform, sate) = satellites.get_mut(*sate)?;
-            transform.translation = get_position_from_orbital_elements(
-                &OrbitalElements::from_orbit_n_sate(orbit, sate),
-            );
+            transform.translation = get_pos_from_elements(orbit, sate.mean_anomaly);
         }
     }
 
     Ok(())
 }
 
-pub fn get_position_from_orbital_elements(orbital: &OrbitalElements) -> Vec3 {
-    let true_anomaly = anomaly_mean_to_true(orbital.mean_anomaly, orbital.eccentricity).unwrap();
+pub fn get_pos_from_elements(orbital: &Orbit, mean_anomaly: f32) -> Vec3 {
+    let true_anomaly = anomaly_mean_to_true(mean_anomaly, orbital.eccentricity).unwrap();
     let n = orbital.mean_motion.powf(-2. / 3.);
     let semi_major_axis = FACTOR * n;
     // r = a(1- e^2) / (1 + e * cos(true_anomaly))

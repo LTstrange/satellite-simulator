@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 
 mod communication;
 mod orbit;
@@ -41,28 +41,43 @@ pub struct OrbitalElements {
 }
 
 impl OrbitalElements {
-    fn new(value: &RawSatelliteData) -> Self {
-        Self {
-            mean_motion: value.mean_motion * 2. * PI / 86400.0, // rev/day to rad/s
-            eccentricity: value.eccentricity,
-            inclination: value.inclination * PI / 180.0, // degrees to rad
-            argument_of_periapsis: value.arg_of_pericenter * PI / 180.0, // degrees to rad
-            longitude_of_ascending_node: value.ra_of_asc_node * PI / 180.0, // degrees to rad
-            mean_anomaly: value.mean_anomaly * PI / 180.0, // degrees to rad
-        }
+    pub fn from_raw_sate_data(
+        raw_data: RawSatelliteData,
+        current_time: DateTime<Utc>,
+    ) -> Result<Self> {
+        let observe_time = parse_time_from_str(&raw_data.epoch)?;
+
+        // convert units
+        let mut orbit_elements = Self {
+            mean_motion: raw_data.mean_motion * 2. * PI / 86400.0, // rev/day to rad/s
+            eccentricity: raw_data.eccentricity,
+            inclination: raw_data.inclination * PI / 180.0, // degrees to rad
+            argument_of_periapsis: raw_data.arg_of_pericenter * PI / 180.0, // degrees to rad
+            longitude_of_ascending_node: raw_data.ra_of_asc_node * PI / 180.0, // degrees to rad
+            mean_anomaly: raw_data.mean_anomaly * PI / 180.0, // degrees to rad
+        };
+
+        // update mean anomaly by current time
+        let duration = current_time - observe_time;
+        orbit_elements.mean_anomaly +=
+            (duration.num_seconds() as f32 * orbit_elements.mean_motion) % (2. * PI);
+        Ok(orbit_elements)
     }
 
-    pub fn from_orbit_n_sate(orbit: &Orbit, sate: &Satellite) -> Self {
-        Self {
-            mean_motion: orbit.mean_motion,
-            eccentricity: orbit.eccentricity,
-            inclination: orbit.inclination,
-            longitude_of_ascending_node: orbit.longitude_of_ascending_node,
-            argument_of_periapsis: orbit.argument_of_periapsis,
-            mean_anomaly: sate.mean_anomaly,
-        }
+    pub fn sep_out_mean_anomaly(&self) -> (Orbit, f32) {
+        (
+            Orbit {
+                mean_motion: self.mean_motion,
+                eccentricity: self.eccentricity,
+                inclination: self.inclination,
+                longitude_of_ascending_node: self.longitude_of_ascending_node,
+                argument_of_periapsis: self.argument_of_periapsis,
+            },
+            self.mean_anomaly,
+        )
     }
 
+    #[allow(unused)]
     pub fn from_slice(data: &[f32; 6]) -> Result<Self, String> {
         let sate = Self {
             mean_motion: data[0],
@@ -107,21 +122,17 @@ fn setup(
     });
 
     let data = if let Some(dataset) = &config.dataset {
-        let raw_satellites_datas = dataset.read_from_file()?;
-
         let current_time = Utc::now();
 
-        raw_satellites_datas
+        dataset
+            .read_from_file()?
             .into_iter()
             .map(|satellite_data| {
-                let observe_time = parse_time_from_str(&satellite_data.epoch);
-                let duration = current_time - observe_time.unwrap();
-                let mut satellite = OrbitalElements::new(&satellite_data);
-                satellite.mean_anomaly +=
-                    (duration.num_seconds() as f32 * satellite.mean_motion) % (2. * PI);
-                (satellite_data.object_id, satellite)
+                let object_id = satellite_data.object_id.clone();
+                let satellite = OrbitalElements::from_raw_sate_data(satellite_data, current_time)?;
+                Ok((object_id, satellite))
             })
-            .collect()
+            .collect::<Result<Vec<(String, OrbitalElements)>>>()?
     } else {
         vec![]
     };

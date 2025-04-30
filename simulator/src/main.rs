@@ -3,7 +3,6 @@ mod prelude {
     pub use serde::Deserialize;
 
     pub use super::config::*;
-    pub use super::satellite::*;
     pub use super::utils::*;
 
     pub use std::f32::consts::PI;
@@ -27,9 +26,10 @@ mod utils;
 fn main() -> Result {
     let mut config_path = std::env::current_dir()?;
     config_path.push("config.toml");
+    println!("Loading Config file... : {:?}", config_path);
     let config = config::Config::load(&config_path)?;
 
-    let port = config.network.port;
+    let _port = config.network.port;
 
     App::new()
         .insert_resource(config)
