@@ -1,12 +1,14 @@
-use bevy::ecs::{relationship::RelatedSpawner, spawn::SpawnWith};
-use display_toggle::toggle;
+use bevy::{
+    color::palettes::tailwind::{SKY_700, SLATE_50},
+    ecs::{relationship::RelatedSpawner, spawn::SpawnWith},
+};
 use fps::fps;
 
 use crate::prelude::*;
 
 mod display_toggle;
 mod fps;
-mod widgets;
+// mod widgets;
 
 pub struct UserInterfacePlugin;
 
@@ -18,9 +20,6 @@ impl Plugin for UserInterfacePlugin {
 }
 
 fn setup(mut commands: Commands, config: Res<Config>) {
-    let orbit = config.Display.orbit;
-    let connection = config.Display.connection;
-
     commands.spawn((
         Node {
             margin: UiRect::all(Val::Px(10.0)),
@@ -28,28 +27,35 @@ fn setup(mut commands: Commands, config: Res<Config>) {
             row_gap: Val::Px(10.),
             ..default()
         },
-        children![
-            fps(),
-            // toggle("Show Orbit", orbit),
-            // toggle("Show Connection", connection)
-        ], // Children::spawn((
-           //     Spawn(fps()),
-           //     SpawnWith(move |parent: &mut RelatedSpawner<ChildOf>| {
-           //         parent.spawn(toggle("Show Orbit", orbit)).observe(
-           //             |trigger: Trigger<widgets::Activate>,
-           //              toggle: Query<&widgets::Toggle>,
-           //              mut config: ResMut<Config>| {
-           //                 config.Display.orbit = toggle.get(trigger.target()).unwrap().0;
-           //             },
-           //         );
-           //         parent.spawn(toggle("Show Connection", connection)).observe(
-           //             |trigger: Trigger<widgets::Activate>,
-           //              toggle: Query<&widgets::Toggle>,
-           //              mut config: ResMut<Config>| {
-           //                 config.Display.connection = toggle.get(trigger.target()).unwrap().0;
-           //             },
-           //         );
-           //     }),
-           // )),
+        Children::spawn(SpawnWith(|parent: &mut RelatedSpawner<ChildOf>| {
+            parent.spawn(fps());
+            parent.spawn(button("Toggle Connection")).observe(
+                |_trigger: Trigger<Pointer<Click>>, mut config: ResMut<Config>| {
+                    info!("Toggle Connection: {}", config.display.connection);
+                    config.display.connection = !config.display.connection;
+                },
+            );
+            parent.spawn(button("Toggle Orbit")).observe(
+                |_trigger: Trigger<Pointer<Click>>, mut config: ResMut<Config>| {
+                    info!("Toggle Orbit: {}", config.display.orbit);
+                    config.display.orbit = !config.display.orbit;
+                },
+            );
+        })),
     ));
+}
+
+fn button<T: Into<String>>(text: T) -> impl Bundle {
+    (
+        Button,
+        BackgroundColor(SKY_700.into()),
+        Node {
+            padding: UiRect::all(Val::Px(5.)),
+            // width: Val::Px(200.),
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        BorderRadius::all(Val::Px(5.)),
+        children![(Text::new(text), TextColor(SLATE_50.into()))],
+    )
 }

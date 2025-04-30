@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Component)]
-#[require(Transform, Connections)]
+#[require(Transform)]
 pub struct Satellite {
     pub mean_anomaly: f32, // 平近点角(rad)
 }
@@ -24,7 +24,7 @@ pub fn update_mean_anomaly(
         let mean_motion = orbit.mean_motion;
         for sate in &sates.0 {
             let mut sate = satellites.get_mut(*sate)?;
-            sate.mean_anomaly += mean_motion * time.delta_secs() * config.Simulation.time_speed;
+            sate.mean_anomaly += mean_motion * time.delta_secs() * config.simulation.time_speed;
             sate.mean_anomaly %= 2. * PI;
         }
     }
