@@ -91,3 +91,17 @@ mod test {
         println!("{}", parsed_time);
     }
 }
+
+pub fn get_rotated_quat(
+    inclination: f32,
+    longitude_of_ascending_node: f32,
+    argument_of_periapsis: f32,
+) -> Quat {
+    let mut quat = Quat::IDENTITY;
+
+    // rotation
+    quat = Quat::from_rotation_x(-inclination) * quat; // rotate_x
+    quat = Quat::from_rotation_z(longitude_of_ascending_node) * quat; // rotate_z
+    quat *= Quat::from_rotation_z(-argument_of_periapsis); // rotate_local_z
+    quat
+}
