@@ -31,14 +31,14 @@ fn setup(mut commands: Commands, _config: Res<Config>) {
             parent.spawn(fps());
             parent.spawn(button("Toggle Connection")).observe(
                 |_trigger: Trigger<Pointer<Click>>, mut config: ResMut<Config>| {
-                    info!("Toggle Connection: {}", config.display.connection);
                     config.display.connection = !config.display.connection;
+                    info!("Toggle Connection: {}", config.display.connection);
                 },
             );
             parent.spawn(button("Toggle Orbit")).observe(
                 |_trigger: Trigger<Pointer<Click>>, mut config: ResMut<Config>| {
-                    info!("Toggle Orbit: {}", config.display.orbit);
                     config.display.orbit = !config.display.orbit;
+                    info!("Toggle Orbit: {}", config.display.orbit);
                 },
             );
         })),
