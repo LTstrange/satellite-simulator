@@ -11,6 +11,8 @@ use manager::*;
 use orbit::*;
 use satellite::*;
 
+pub use orbit::ToggleOrbitGizmos;
+
 const FACTOR: f32 = 73.594_6; // u^(1/3)
 
 /// A Core Plugin for the simulator.

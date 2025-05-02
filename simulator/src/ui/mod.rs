@@ -4,7 +4,7 @@ use bevy::{
 };
 use fps::fps;
 
-use crate::prelude::*;
+use crate::{core::ToggleOrbitGizmos, prelude::*};
 
 mod display_toggle;
 mod fps;
@@ -36,9 +36,12 @@ fn setup(mut commands: Commands, _config: Res<Config>) {
                 },
             );
             parent.spawn(button("Toggle Orbit")).observe(
-                |_trigger: Trigger<Pointer<Click>>, mut config: ResMut<Config>| {
+                |_trigger: Trigger<Pointer<Click>>,
+                 mut config: ResMut<Config>,
+                 mut commands: Commands| {
                     config.display.orbit = !config.display.orbit;
                     info!("Toggle Orbit: {}", config.display.orbit);
+                    commands.trigger(ToggleOrbitGizmos);
                 },
             );
         })),

@@ -6,7 +6,8 @@ pub struct OrbitPlugin;
 
 impl Plugin for OrbitPlugin {
     fn build(&self, app: &mut App) {
-        app.add_observer(update_orbit_gizmo)
+        app.add_observer(update_orbit_gizmos)
+            .add_observer(toggle_orbit_gizmos)
             .add_systems(Startup, setup);
     }
 }
@@ -26,25 +27,40 @@ struct OrbitGizmos;
 #[derive(Event)]
 pub struct OrbitChanged;
 
+#[derive(Event)]
+pub struct ToggleOrbitGizmos;
+
 fn setup(mut commands: Commands) {
-    commands.spawn((OrbitGizmos, Gizmo::default(), Disabled));
+    commands.spawn((OrbitGizmos, Gizmo::default()));
 }
 
-fn update_orbit_gizmo(
+fn update_orbit_gizmos(
     _trigger: Trigger<OrbitChanged>,
-    gizmos: Option<Single<&mut Gizmo, With<OrbitGizmos>>>,
+    gizmos: Single<(&mut Gizmo, Has<Disabled>), With<OrbitGizmos>>,
     mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
     orbits: Query<&Orbit>,
-) -> Result {
+) {
     info!("update_orbit_gizmo");
     let mut gizmo = GizmoAsset::default();
     for orbit in orbits {
         draw_orbit_gizmo(orbit, &mut gizmo);
     }
-    if let Some(mut gizmos) = gizmos {
-        gizmos.handle = gizmo_assets.add(gizmo);
+    let (mut gizmos, _) = gizmos.into_inner();
+    gizmos.handle = gizmo_assets.add(gizmo);
+}
+
+fn toggle_orbit_gizmos(
+    _trigger: Trigger<ToggleOrbitGizmos>,
+    gizmos: Single<(Entity, Has<Disabled>), With<OrbitGizmos>>,
+    config: Res<Config>,
+    mut commands: Commands,
+) {
+    let (e, _) = gizmos.into_inner();
+    if config.display.orbit {
+        commands.entity(e).remove::<Disabled>();
+    } else {
+        commands.entity(e).insert(Disabled);
     }
-    Ok(())
 }
 
 fn draw_orbit_gizmo(elements: &Orbit, gizmo: &mut GizmoAsset) {
