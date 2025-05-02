@@ -72,7 +72,7 @@ fn update_satellite_position(
     Ok(())
 }
 
-pub fn get_pos_from_elements(orbital: &Orbit, mean_anomaly: f32) -> Vec3 {
+fn get_pos_from_elements(orbital: &Orbit, mean_anomaly: f32) -> Vec3 {
     let true_anomaly = anomaly_mean_to_true(mean_anomaly, orbital.eccentricity).unwrap();
     let n = orbital.mean_motion.powf(-2. / 3.);
     let semi_major_axis = FACTOR * n;
