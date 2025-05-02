@@ -15,7 +15,7 @@ pub struct Orbit {
     pub argument_of_periapsis: f32,       // 近地点角距(rad)
 }
 
-pub fn draw_orbit_gizmo(elements: &OrbitalElements, gizmo: &mut GizmoAsset) {
+pub fn draw_orbit_gizmo(elements: &Orbit, gizmo: &mut GizmoAsset) {
     // half size of the ellipse
     let n = elements.mean_motion.powf(-2. / 3.);
     // a = u^(1/3) * ( n ) ^ (-2/3)
@@ -40,28 +40,6 @@ pub fn draw_orbit_gizmo(elements: &OrbitalElements, gizmo: &mut GizmoAsset) {
     let iso = Isometry3d::new(location, rotation);
 
     gizmo.ellipse(iso, half_size, Color::srgba(1., 1., 1., 0.01));
-}
-
-pub fn orbit(
-    sate_name: String,
-    elements: &OrbitalElements,
-    mesh: Handle<Mesh>,
-    mat: Handle<StandardMaterial>,
-) -> impl Bundle {
-    let (orbit, mean_anomaly) = elements.sep_out_mean_anomaly();
-    let pos = get_pos_from_elements(&orbit, mean_anomaly);
-    (
-        orbit,
-        related!(
-            FollowedBy[(
-                Satellite { mean_anomaly },
-                Name::new(sate_name),
-                Mesh3d(mesh),
-                MeshMaterial3d(mat),
-                Transform::from_translation(pos),
-            )]
-        ),
-    )
 }
 
 #[derive(Component)]

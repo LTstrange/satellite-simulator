@@ -24,6 +24,22 @@ pub struct Following(Entity);
 #[relationship_target(relationship= Following)]
 pub struct FollowedBy(Vec<Entity>);
 
+pub fn create_satellite(
+    satellite_id: String,
+    orbit_entity: Entity,
+    mean_anomaly: f32,
+    mesh: Handle<Mesh>,
+    material: Handle<StandardMaterial>,
+) -> impl Bundle {
+    (
+        Satellite { mean_anomaly },
+        Mesh3d(mesh),
+        MeshMaterial3d(material),
+        Name::new(satellite_id),
+        Following(orbit_entity),
+    )
+}
+
 fn update_mean_anomaly(
     config: Res<Config>,
     orbits: Query<(&Orbit, &FollowedBy)>,
