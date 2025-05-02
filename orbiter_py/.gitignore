@@ -68,3 +68,6 @@ docs/_build/
 
 # Pyenv
 .python-version
+
+
+uv.lock
