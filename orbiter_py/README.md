@@ -1,8 +1,8 @@
 # Orbiter_py
 
-`orbiter_py` 是一个用于连接和控制卫星模拟器的 Python 包。通过这个包，用户可以使用 Python 代码控制卫星模拟器，执行如建立连接、发送控制命令等操作。
+`orbiter_py` is a Python package designed to connect to the simulator and control its functionalities. With this package, users can create orbits and satellites, establish inter-satellite links (ISLs), and retrieve the satellite network graph.
 
-## 安装
+## Installation
 
 
-## 使用示例
+## Usage

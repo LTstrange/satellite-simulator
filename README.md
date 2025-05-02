@@ -47,13 +47,13 @@ Users can access real-time simulation data through a network interface for furth
 
    Compile the project:
    ```bash
-   cargo build
+   cargo build --release
    ```
 4. **Run the Simulator**
 
    Start the simulator by running:
    ```bash
-   cargo run
+   cargo run --release
    ```
 
 ## Usage
@@ -76,7 +76,7 @@ The simulator's behavior can be customized through the `config.toml` file, which
       - **connection_distance**: Maximum inter-satellite link range
       - **connection_number**: Maximum connections per satellite
 
-### Network Interface (Deprecated, decided to switch to brp-base, see [orbiter_py](./orbiter_py/README.md)):
+### Network Interface (Deprecated, decided to switch to bevy remote protocol, see [orbiter_py](./orbiter_py/README.md)):
 The simulator exposes a JSON-based network interface for data retrieval and control:
 
    There are common patterns for the json commands:
