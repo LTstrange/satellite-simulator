@@ -1,5 +1,11 @@
 use super::*;
 
+pub struct OrbitPlugin;
+
+impl Plugin for OrbitPlugin {
+    fn build(&self, app: &mut App) {}
+}
+
 #[derive(Component)]
 pub struct Orbit {
     pub mean_motion: f32,                 // 平均运动(rad/s)
@@ -48,9 +54,7 @@ pub fn orbit(
         orbit,
         related!(
             FollowedBy[(
-                Satellite {
-                    mean_anomaly: elements.mean_anomaly,
-                },
+                Satellite { mean_anomaly },
                 Name::new(sate_name),
                 Mesh3d(mesh),
                 MeshMaterial3d(mat),
