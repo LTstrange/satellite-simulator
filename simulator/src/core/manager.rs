@@ -4,30 +4,34 @@ pub struct ManagerPlugin;
 
 impl Plugin for ManagerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-        app.init_resource::<SatelliteSpawner>();
+        app.init_resource::<SatelliteManager>();
 
         app.add_event::<SpawnSatellites>()
-            .add_systems(Update, (receive_events, spawn).chain());
+            .add_event::<SpawnOrbits>()
+            .add_event::<AttachSatellites>()
+            .add_systems(FixedUpdate, (receive_events, spawn).chain());
     }
 }
 
-fn setup(mut _commands: Commands) {
-    // commands.insert_resource(SatelliteSpawner {
-    //     mesh: satellite_mesh,
-    //     material: satellite_material,
-    //     unspawned_sats: data,
-    // });
-}
-
 #[derive(Resource, Default)]
-struct SatelliteSpawner {
+pub struct SatelliteManager {
     mesh: Handle<Mesh>,
     material: Handle<StandardMaterial>,
     orbit_entities: Vec<Entity>,
     unspawned_sats: Vec<(String, OrbitalElements)>,
     unspawned_orbs: Vec<Orbit>,
     unattached_sats: Vec<(Entity, String, Satellite)>,
+}
+
+impl SatelliteManager {
+    pub fn init(&mut self, mesh: Handle<Mesh>, material: Handle<StandardMaterial>) {
+        self.mesh = mesh;
+        self.material = material;
+    }
+
+    pub fn add_satellites(&mut self, satellites: Vec<(String, OrbitalElements)>) {
+        self.unspawned_sats.extend(satellites);
+    }
 }
 
 #[derive(Event)]
@@ -49,7 +53,7 @@ fn receive_events(
     mut spawn_sat_events: EventReader<SpawnSatellites>,
     mut spawn_orbit_events: EventReader<SpawnOrbits>,
     mut attach_sat_events: EventReader<AttachSatellites>,
-    mut satellite_spawner: ResMut<SatelliteSpawner>,
+    mut satellite_spawner: ResMut<SatelliteManager>,
 ) {
     satellite_spawner.unspawned_sats.extend(
         spawn_sat_events
@@ -71,11 +75,13 @@ fn receive_events(
     );
 }
 
-fn spawn(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>) {
+fn spawn(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteManager>) {
     let mesh = satellite_spawner.mesh.clone();
     let material = satellite_spawner.material.clone();
     assert_ne!(mesh.clone(), Handle::default());
     assert_ne!(material.clone(), Handle::default());
+
+    let mut need_update_orbit_gizmo = false;
 
     // spawn orbits
     let iter: Vec<_> = satellite_spawner
@@ -86,6 +92,9 @@ fn spawn(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>
             // satellite_spawner.orbit_entities.push(orbit_entity);
         })
         .collect();
+    if iter.len() > 0 {
+        need_update_orbit_gizmo = true;
+    }
     satellite_spawner.orbit_entities.extend(iter);
 
     // spawn satellites
@@ -106,6 +115,9 @@ fn spawn(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>
             orbit_entity
         })
         .collect();
+    if iter.len() > 0 {
+        need_update_orbit_gizmo = true;
+    }
     satellite_spawner.orbit_entities.extend(iter);
 
     // attach satellites to orbits
@@ -120,4 +132,9 @@ fn spawn(mut commands: Commands, mut satellite_spawner: ResMut<SatelliteSpawner>
             ));
         },
     );
+
+    if need_update_orbit_gizmo {
+        info!("Send out OrbitChanged event");
+        commands.trigger(OrbitChanged);
+    }
 }

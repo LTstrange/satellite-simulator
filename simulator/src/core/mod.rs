@@ -17,7 +17,12 @@ pub struct CorePlugin;
 
 impl Plugin for CorePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((CommunicationPlugin, ManagerPlugin, SatellitePlugin));
+        app.add_plugins((
+            CommunicationPlugin,
+            ManagerPlugin,
+            SatellitePlugin,
+            OrbitPlugin,
+        ));
 
         app.add_systems(Startup, setup);
     }
@@ -89,11 +94,12 @@ impl OrbitalElements {
 
 /// Read satellite data and Setup Satellite Spawner.
 fn setup(
-    mut commands: Commands,
-    mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
+    // mut commands: Commands,
+    // mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
     config: Res<Config>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut manager: ResMut<SatelliteManager>,
 ) -> Result {
     let satellite_mesh = meshes.add(Sphere::new(20.).mesh().ico(1).unwrap());
     let satellite_material = materials.add(StandardMaterial {
@@ -101,6 +107,7 @@ fn setup(
         unlit: true,
         ..default()
     });
+    manager.init(satellite_mesh, satellite_material);
 
     // read satellite data
     let data = if let Some(dataset) = &config.dataset {
@@ -119,25 +126,30 @@ fn setup(
         vec![]
     };
 
-    // draw orbit gizmo and spawn satellites
-    let mut gizmo = GizmoAsset::default();
-    for (satellite_id, satellite) in data {
-        let (orbit, mean_anomaly) = satellite.sep_out_mean_anomaly();
-        draw_orbit_gizmo(&orbit, &mut gizmo);
-        let orbit_entity = commands.spawn(orbit).id();
-        commands.spawn(create_satellite(
-            satellite_id,
-            orbit_entity,
-            mean_anomaly,
-            satellite_mesh.clone(),
-            satellite_material.clone(),
-        ));
-    }
+    manager.add_satellites(data);
 
-    commands.spawn(Gizmo {
-        handle: gizmo_assets.add(gizmo),
-        ..default()
-    });
+    // // draw orbit gizmo and spawn satellites
+    // let mut gizmo = GizmoAsset::default();
+    // for (satellite_id, satellite) in data {
+    //     let (orbit, mean_anomaly) = satellite.sep_out_mean_anomaly();
+    //     draw_orbit_gizmo(&orbit, &mut gizmo);
+    //     let orbit_entity = commands.spawn(orbit).id();
+    //     commands.spawn(create_satellite(
+    //         satellite_id,
+    //         orbit_entity,
+    //         mean_anomaly,
+    //         satellite_mesh.clone(),
+    //         satellite_material.clone(),
+    //     ));
+    // }
+
+    // commands.spawn((
+    //     OrbitGizmos,
+    //     Gizmo {
+    //         handle: gizmo_assets.add(gizmo),
+    //         ..default()
+    //     },
+    // ));
 
     Ok(())
 }

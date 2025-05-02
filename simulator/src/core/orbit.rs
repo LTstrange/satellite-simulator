@@ -3,7 +3,10 @@ use super::*;
 pub struct OrbitPlugin;
 
 impl Plugin for OrbitPlugin {
-    fn build(&self, app: &mut App) {}
+    fn build(&self, app: &mut App) {
+        app.add_observer(update_orbit_gizmo)
+            .add_systems(Startup, setup);
+    }
 }
 
 #[derive(Component, Clone)]
@@ -13,6 +16,33 @@ pub struct Orbit {
     pub inclination: f32,                 // 轨道倾角(rad)
     pub longitude_of_ascending_node: f32, // 升交点赤经(rad)
     pub argument_of_periapsis: f32,       // 近地点角距(rad)
+}
+
+#[derive(Component)]
+pub struct OrbitGizmos;
+
+#[derive(Event)]
+pub struct OrbitChanged;
+
+fn setup(mut commands: Commands) {
+    commands.spawn((OrbitGizmos, Gizmo::default()));
+}
+
+fn update_orbit_gizmo(
+    _trigger: Trigger<OrbitChanged>,
+    mut gizmos: Query<&mut Gizmo, With<OrbitGizmos>>,
+    mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
+    orbits: Query<&Orbit>,
+) -> Result {
+    info!("update_orbit_gizmo");
+    let mut gizmo = GizmoAsset::default();
+    for orbit in orbits {
+        draw_orbit_gizmo(orbit, &mut gizmo);
+    }
+    let mut gizmos = gizmos.single_mut()?;
+
+    gizmos.handle = gizmo_assets.add(gizmo);
+    Ok(())
 }
 
 pub fn draw_orbit_gizmo(elements: &Orbit, gizmo: &mut GizmoAsset) {
@@ -41,6 +71,3 @@ pub fn draw_orbit_gizmo(elements: &Orbit, gizmo: &mut GizmoAsset) {
 
     gizmo.ellipse(iso, half_size, Color::srgba(1., 1., 1., 0.01));
 }
-
-#[derive(Component)]
-struct OrbitGizmos;
