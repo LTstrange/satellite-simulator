@@ -6,7 +6,7 @@ impl Plugin for OrbitPlugin {
     fn build(&self, app: &mut App) {}
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Orbit {
     pub mean_motion: f32,                 // 平均运动(rad/s)
     pub eccentricity: f32,                // 离心率

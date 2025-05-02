@@ -57,7 +57,7 @@ impl OrbitalElements {
         Ok(orbit_elements)
     }
 
-    pub fn sep_out_mean_anomaly(&self) -> (Orbit, f32) {
+    pub fn sep_out_mean_anomaly(self) -> (Orbit, f32) {
         (
             Orbit {
                 mean_motion: self.mean_motion,

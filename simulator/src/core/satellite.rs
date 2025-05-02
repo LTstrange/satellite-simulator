@@ -10,7 +10,7 @@ impl Plugin for SatellitePlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 #[require(Transform)]
 pub struct Satellite {
     pub mean_anomaly: f32, // 平近点角(rad)
