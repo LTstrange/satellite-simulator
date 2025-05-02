@@ -11,6 +11,7 @@
 ## V0.2.0
 - [x] Separate orbit and satellites functionality
 - [ ] Accept TLE file
+    By generalize config.rs
 - [ ] Better UI.
 - [ ] use entity relationship to discribe connections.
 - [ ] Brp based network control.
@@ -24,6 +25,7 @@
 Recording planned and future tasks.
 
 Functionality:
+- Upgrade to bevy 0.16
 - python control:
     - create satellites
     - create ISLs between satellites
