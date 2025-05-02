@@ -13,6 +13,7 @@ use satellite::*;
 
 const FACTOR: f32 = 73.594_6; // u^(1/3)
 
+/// A Core Plugin for the simulator.
 pub struct CorePlugin;
 
 impl Plugin for CorePlugin {
@@ -28,6 +29,8 @@ impl Plugin for CorePlugin {
     }
 }
 
+/// A struct representing the orbital elements of a satellite.
+/// Which is the cohesive data structure for the satellite and orbit at once.
 #[derive(Debug, Clone)]
 pub struct OrbitalElements {
     mean_motion: f32,                 // 平均运动(rad/s)
@@ -39,6 +42,8 @@ pub struct OrbitalElements {
 }
 
 impl OrbitalElements {
+    /// Create a new `OrbitalElements` instance from raw satellite data.
+    /// By convert the units of the data. And update the mean anomaly by the current time.
     pub fn from_raw_sate_data(
         raw_data: RawSatelliteData,
         current_time: DateTime<Utc>,
@@ -92,10 +97,8 @@ impl OrbitalElements {
     }
 }
 
-/// Read satellite data and Setup Satellite Spawner.
+/// Read satellite data and Setup Satellite Manager.
 fn setup(
-    // mut commands: Commands,
-    // mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
     config: Res<Config>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
