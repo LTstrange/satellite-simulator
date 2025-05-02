@@ -13,16 +13,13 @@ use satellite::*;
 
 const FACTOR: f32 = 73.594_6; // u^(1/3)
 
-pub struct SatellitePlugin;
+pub struct CorePlugin;
 
-impl Plugin for SatellitePlugin {
+impl Plugin for CorePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((CommunicationPlugin, ManagerPlugin));
+        app.add_plugins((CommunicationPlugin, ManagerPlugin, SatellitePlugin));
 
-        app.add_systems(Startup, setup).add_systems(
-            FixedUpdate,
-            (update_mean_anomaly, update_satellite_position).chain(),
-        );
+        app.add_systems(Startup, setup);
     }
 }
 
@@ -105,6 +102,7 @@ fn setup(
         ..default()
     });
 
+    // read satellite data
     let data = if let Some(dataset) = &config.dataset {
         let current_time = Utc::now();
 
@@ -121,6 +119,7 @@ fn setup(
         vec![]
     };
 
+    // draw orbit gizmo and spawn satellites
     let mut gizmo = GizmoAsset::default();
     for (satellite_id, satellite) in &data {
         draw_orbit_gizmo(satellite, &mut gizmo);

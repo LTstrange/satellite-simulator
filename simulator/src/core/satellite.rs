@@ -1,5 +1,15 @@
 use super::*;
 
+pub struct SatellitePlugin;
+impl Plugin for SatellitePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            FixedUpdate,
+            (update_mean_anomaly, update_satellite_position).chain(),
+        );
+    }
+}
+
 #[derive(Component)]
 #[require(Transform)]
 pub struct Satellite {
@@ -14,7 +24,7 @@ pub struct Following(Entity);
 #[relationship_target(relationship= Following)]
 pub struct FollowedBy(Vec<Entity>);
 
-pub fn update_mean_anomaly(
+fn update_mean_anomaly(
     config: Res<Config>,
     orbits: Query<(&Orbit, &FollowedBy)>,
     mut satellites: Query<&mut Satellite>,
@@ -32,7 +42,7 @@ pub fn update_mean_anomaly(
     Ok(())
 }
 
-pub fn update_satellite_position(
+fn update_satellite_position(
     orbits: Query<(&Orbit, &FollowedBy)>,
     mut satellites: Query<(&mut Transform, &Satellite)>,
 ) -> Result {

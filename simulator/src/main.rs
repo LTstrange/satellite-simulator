@@ -13,13 +13,13 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use prelude::*;
 
 use camera::OrbitCameraPlugin;
-use satellite::SatellitePlugin;
+use core::CorePlugin;
 use ui::UserInterfacePlugin;
 
 mod camera;
 mod config;
 // mod io;
-mod satellite;
+mod core;
 mod ui;
 mod utils;
 
@@ -36,7 +36,7 @@ fn main() -> Result {
         .add_plugins(DefaultPlugins)
         .add_plugins((
             OrbitCameraPlugin,
-            SatellitePlugin,
+            CorePlugin,
             // io::IOPlugin::new(port),
             UserInterfacePlugin,
             FrameTimeDiagnosticsPlugin::default(),

@@ -4,7 +4,7 @@ pub struct ManagerPlugin;
 
 impl Plugin for ManagerPlugin {
     fn build(&self, app: &mut App) {
-
+        app.add_systems(Startup, setup);
         // app.init_resource::<SatelliteSpawner>();
 
         // app.add_event::<SpawnSatellites>();
@@ -12,7 +12,7 @@ impl Plugin for ManagerPlugin {
     }
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut _commands: Commands) {
     // commands.insert_resource(SatelliteSpawner {
     //     mesh: satellite_mesh,
     //     material: satellite_material,
