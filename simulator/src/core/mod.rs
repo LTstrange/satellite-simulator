@@ -128,28 +128,5 @@ fn setup(
 
     manager.add_satellites(data);
 
-    // // draw orbit gizmo and spawn satellites
-    // let mut gizmo = GizmoAsset::default();
-    // for (satellite_id, satellite) in data {
-    //     let (orbit, mean_anomaly) = satellite.sep_out_mean_anomaly();
-    //     draw_orbit_gizmo(&orbit, &mut gizmo);
-    //     let orbit_entity = commands.spawn(orbit).id();
-    //     commands.spawn(create_satellite(
-    //         satellite_id,
-    //         orbit_entity,
-    //         mean_anomaly,
-    //         satellite_mesh.clone(),
-    //         satellite_material.clone(),
-    //     ));
-    // }
-
-    // commands.spawn((
-    //     OrbitGizmos,
-    //     Gizmo {
-    //         handle: gizmo_assets.add(gizmo),
-    //         ..default()
-    //     },
-    // ));
-
     Ok(())
 }
