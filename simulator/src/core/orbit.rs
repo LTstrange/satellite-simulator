@@ -1,3 +1,5 @@
+use bevy::ecs::entity_disabling::Disabled;
+
 use super::*;
 
 pub struct OrbitPlugin;
@@ -19,18 +21,18 @@ pub struct Orbit {
 }
 
 #[derive(Component)]
-pub struct OrbitGizmos;
+struct OrbitGizmos;
 
 #[derive(Event)]
 pub struct OrbitChanged;
 
 fn setup(mut commands: Commands) {
-    commands.spawn((OrbitGizmos, Gizmo::default()));
+    commands.spawn((OrbitGizmos, Gizmo::default(), Disabled));
 }
 
 fn update_orbit_gizmo(
     _trigger: Trigger<OrbitChanged>,
-    mut gizmos: Query<&mut Gizmo, With<OrbitGizmos>>,
+    gizmos: Option<Single<&mut Gizmo, With<OrbitGizmos>>>,
     mut gizmo_assets: ResMut<Assets<GizmoAsset>>,
     orbits: Query<&Orbit>,
 ) -> Result {
@@ -39,13 +41,13 @@ fn update_orbit_gizmo(
     for orbit in orbits {
         draw_orbit_gizmo(orbit, &mut gizmo);
     }
-    let mut gizmos = gizmos.single_mut()?;
-
-    gizmos.handle = gizmo_assets.add(gizmo);
+    if let Some(mut gizmos) = gizmos {
+        gizmos.handle = gizmo_assets.add(gizmo);
+    }
     Ok(())
 }
 
-pub fn draw_orbit_gizmo(elements: &Orbit, gizmo: &mut GizmoAsset) {
+fn draw_orbit_gizmo(elements: &Orbit, gizmo: &mut GizmoAsset) {
     // half size of the ellipse
     let n = elements.mean_motion.powf(-2. / 3.);
     // a = u^(1/3) * ( n ) ^ (-2/3)

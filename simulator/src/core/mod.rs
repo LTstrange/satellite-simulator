@@ -32,7 +32,7 @@ impl Plugin for CorePlugin {
 /// A struct representing the orbital elements of a satellite.
 /// Which is the cohesive data structure for the satellite and orbit at once.
 #[derive(Debug, Clone)]
-pub struct OrbitalElements {
+struct OrbitalElements {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角(rad)
@@ -44,10 +44,7 @@ pub struct OrbitalElements {
 impl OrbitalElements {
     /// Create a new `OrbitalElements` instance from raw satellite data.
     /// By convert the units of the data. And update the mean anomaly by the current time.
-    pub fn from_raw_sate_data(
-        raw_data: RawSatelliteData,
-        current_time: DateTime<Utc>,
-    ) -> Result<Self> {
+    fn from_raw_sate_data(raw_data: RawSatelliteData, current_time: DateTime<Utc>) -> Result<Self> {
         let observe_time = parse_time_from_str(&raw_data.epoch)?;
 
         // convert units
@@ -67,7 +64,7 @@ impl OrbitalElements {
         Ok(orbit_elements)
     }
 
-    pub fn sep_out_mean_anomaly(self) -> (Orbit, f32) {
+    fn sep_out_mean_anomaly(self) -> (Orbit, f32) {
         (
             Orbit {
                 mean_motion: self.mean_motion,
