@@ -76,52 +76,13 @@ The simulator's behavior can be customized through the `config.toml` file, which
       - **connection_distance**: Maximum inter-satellite link range
       - **connection_number**: Maximum connections per satellite
 
-### Network Interface (Deprecated, decided to switch to bevy remote protocol, see [orbiter_py](./orbiter_py/README.md)):
-The simulator exposes a JSON-based network interface for data retrieval and control:
+### Network Interface (Python Bindings in Progress) 🐍🛠️
 
-   There are common patterns for the json commands:
-   **Request Format:**
-   ```json
-   {
-      "cmd": "<command_name>",
-      "params": { /* optional parameters */ }
-   }
-   ```
+I'm currently working on writing a Rust crate to communicate with this Bevy app over the network — and then wrapping it as a Python package for easier integration in research workflows.
 
-   **Response Format:**
-   ```json
-   {
-      "status": "success|error",
-      "data": { /* command-specific response data */ }
-   }
-   ```
+However, learning how to properly use PyO3 and Maturin has proven to be more challenging than expected. I've already gone through multiple rewrites of this component, and more time is needed to finalize the implementation.
 
-   Now the simulator supports the following commands:
-   1. **GetTopology**: 
-      Retrieves the current satellite topology.
-
-      Command:
-      ```json
-      {
-         "cmd": "GetTopology",
-         "params": null
-      }
-      ```
-
-      Response:
-      ```json
-      {
-         "status": "success",
-         "data": {
-            "<satellite_id_from>": [
-               "<satellite_id_to>",
-               ...
-            ],
-            ...
-         }
-      }
-      ```
-
+If you're familiar with building high-performance Python-Rust interfaces, contributions or advice would be greatly appreciated! 🙏✨
 
 ## Future Work
 - **Enhanced Communication Link Modeling**: Add simulations for transmission delays and signal interference within established satellite links.
