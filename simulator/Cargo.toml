@@ -11,8 +11,7 @@ serde_json = "1.0.*"
 chrono = "0.4.*"
 toml = "0.8.19"
 rand = "0.9.*"
-async-channel = "2.3.1"
-async-net = "2.0.0"
+
 
 brp_packages = { path = "../brp_packages"}
 
