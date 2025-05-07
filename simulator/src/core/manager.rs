@@ -36,7 +36,7 @@ impl SatelliteManager {
 
 #[derive(Event)]
 pub struct SpawnSatellites {
-    satellites: Vec<(String, OrbitalElements)>,
+    pub satellites: Vec<(String, OrbitalElements)>,
 }
 
 #[derive(Event)]

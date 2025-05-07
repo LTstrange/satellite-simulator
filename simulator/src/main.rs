@@ -3,6 +3,7 @@ mod prelude {
     pub use serde::Deserialize;
 
     pub use super::config::*;
+    pub use super::core::*;
     pub use super::utils::*;
 
     pub use std::f32::consts::PI;
@@ -18,8 +19,8 @@ use ui::UserInterfacePlugin;
 
 mod camera;
 mod config;
-// mod io;
 mod core;
+mod io;
 mod ui;
 mod utils;
 
@@ -29,7 +30,7 @@ fn main() -> Result {
     println!("Loading Config file... : {:?}", config_path);
     let config = config::Config::load(&config_path)?;
 
-    let _port = config.network.port;
+    let port = config.network.port;
 
     App::new()
         .insert_resource(config)
@@ -37,7 +38,7 @@ fn main() -> Result {
         .add_plugins((
             OrbitCameraPlugin,
             CorePlugin,
-            // io::IOPlugin::new(port),
+            io::IOPlugin::new(port),
             UserInterfacePlugin,
             FrameTimeDiagnosticsPlugin::default(),
         ))

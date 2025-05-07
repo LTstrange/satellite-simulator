@@ -11,7 +11,9 @@ use manager::*;
 use orbit::*;
 use satellite::*;
 
-pub use orbit::ToggleOrbitGizmos;
+pub use manager::{AttachSatellites, SpawnOrbits, SpawnSatellites};
+pub use orbit::{Orbit, ToggleOrbitGizmos};
+pub use satellite::Satellite;
 
 const FACTOR: f32 = 73.594_6; // u^(1/3)
 
@@ -34,7 +36,7 @@ impl Plugin for CorePlugin {
 /// A struct representing the orbital elements of a satellite.
 /// Which is the cohesive data structure for the satellite and orbit at once.
 #[derive(Debug, Clone)]
-struct OrbitalElements {
+pub struct OrbitalElements {
     mean_motion: f32,                 // 平均运动(rad/s)
     eccentricity: f32,                // 离心率
     inclination: f32,                 // 轨道倾角(rad)
